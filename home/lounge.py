@@ -1,4 +1,10 @@
+from datetime import datetime
+
+from astral import now
+from loguru import logger
+
 import drhue.home as home
+from drhue.time_periods import get_time_periods
 
 
 class LoungeLights(home.Lights):
@@ -22,8 +28,19 @@ class Boopy(home.Vacuum):
 
 
 class Lounge(home.Room):
+    """
+    eventually:
+    come on first in eve as light starts to dip with read
+    then fade into relax
+    then read when dinner
+    then relax
+    then off when bed
+    dim when come down in night
+
+
+    """
     name = 'Lounge'
-    device_classes = [
+    _device_classes = [
         LoungeLights,
         LoungeSensor,
         LoungeSpeaker,
@@ -31,8 +48,27 @@ class Lounge(home.Room):
         Boopy
     ]
 
-    def apply_rules(self):
-        # set brightness and timeout here depending on tiem of day and ambient light levels
+    def run_rules(self):
 
-        if self.sensor.motion:
-            self.lights.on = True
+
+        times = get_time_periods()
+        if times["sunrise"] << datetime.now() << times["sunset"]:
+            return
+
+        # elif time between sunset and dusk and motion detected
+            # activiate read with timeout of 30min
+            # turn off after
+
+        # elif time between dusk and bedtime
+            # activate read with timeout of 1 hour
+
+        # elif time between bedtime and dawn next day
+
+
+
+        if self.get_device(LoungeSensor.name).motion:
+            logger.debug("Motion detected.")
+            self.get_device(LoungeLights.name).on = True
+        else:
+            logger.debug("Motion not detected.")
+            self.get_device(LoungeLights.name).on = False
