@@ -1,6 +1,6 @@
 import time
 
-from drhue.bridge import get_bridge
+from drhue.bridge import get_bridge, DrHueBridge
 from drhue.home import Room, Lights, Sensor, GoogleHome, Chromecast, Vaccuum, Home
 from home.my_home import MyHome
 
@@ -66,16 +66,12 @@ def init_rooms():
 
 def run_main_loop():
     # init bridge
-    # init light groups and sensors
-    # pass bridge and resources to home init
-    # ensure consistency
-    bridge = get_bridge()
+    bridge = DrHueBridge()
     home = MyHome(bridge=bridge)
     while True:
-        home.update()
+        bridge.read()
         home.run_rules()
-        home.apply_rules()
-        home.commit()
+        bridge.write()
         time.sleep(1)
 
 
