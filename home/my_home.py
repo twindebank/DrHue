@@ -61,11 +61,12 @@ from home.lounge import Lounge
 #     ]
 #     return rooms
 
-
 class MyHome(Home):
     name = "My home"
-    room_definitions = [Lounge]
+    room_classes = [Lounge]
 
     # do all the fun state tracking in this class/base class
     def run_rules(self):
         pass
+
+

@@ -1,17 +1,22 @@
+import datetime
 import time
 
 from drhue.bridge import DrHueBridge
+from drhue.context import Context
 from home.my_home import MyHome
 
 
 def run_main_loop():
     bridge = DrHueBridge()
-    bridge.read()
-    home = MyHome(bridge=bridge)
+    context = Context(
+        bridge=bridge,
+        bedtime=datetime.time(hour=23, minute=45)
+    )
+    home = MyHome(context=context)
     while True:
-        bridge.read()
+        context.bridge.read()
         home.run_all_rules()
-        bridge.write()
+        context.bridge.write()
         time.sleep(1)
 
 

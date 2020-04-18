@@ -1,10 +1,6 @@
-from datetime import datetime
-
-from astral import now
 from loguru import logger
 
 import drhue.home as home
-from drhue.time_periods import get_time_periods
 
 
 class LoungeLights(home.Lights):
@@ -50,25 +46,21 @@ class Lounge(home.Room):
 
     def run_rules(self):
 
-
-        times = get_time_periods()
-        if times["sunrise"] << datetime.now() << times["sunset"]:
-            return
+        # if self.context.sunrise < self.context.now < self.context.sunset:
+        #     return
 
         # elif time between sunset and dusk and motion detected
-            # activiate read with timeout of 30min
-            # turn off after
+        # activiate read with timeout of 30min
+        # turn off after
 
         # elif time between dusk and bedtime
-            # activate read with timeout of 1 hour
+        # activate read with timeout of 1 hour
 
         # elif time between bedtime and dawn next day
 
-
-
-        if self.get_device(LoungeSensor.name).motion:
+        if self.devices[LoungeSensor].motion:
             logger.debug("Motion detected.")
-            self.get_device(LoungeLights.name).on = True
+            self.devices[LoungeLights].on = True
         else:
             logger.debug("Motion not detected.")
-            self.get_device(LoungeLights.name).on = False
+            self.devices[LoungeLights].on = False

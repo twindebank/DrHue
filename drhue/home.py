@@ -1,31 +1,39 @@
 from __future__ import annotations
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import List, Type, Dict
+from abc import ABC, abstractmethod, ABCMeta
+from typing import List, Type, Dict, Union
 
 from loguru import logger
 
 from drhue.bridge import DrHueLights, DrHueSensor
 
 
-class _Entity(ABC):
+class _Entity(metaclass=ABCMeta):
+    def __init__(self, context):
+        self.context = context
+
     @property
     @abstractmethod
     def name(self) -> str:
         pass
 
+    def __hash__(self):
+        return hash(self.name)
 
-class Home(_Entity, ABC):
+
+class Home(_Entity, metaclass=ABCMeta):
     rooms: List[Room]
 
     @property
     @abstractmethod
-    def room_definitions(self) -> List[Type[Room]]:
+    def room_classes(self) -> List[Type[Room]]:
         pass
 
-    def __init__(self, bridge):
-        self.rooms = [room(bridge) for room in self.room_definitions]
+    def __init__(self, context):
+        super().__init__(context)
+        self.context.bridge.read()
+        self.rooms = [room(context) for room in self.room_classes]
         self.rooms_as_dict = {room.name: room for room in self.rooms}
 
     def run_all_rules(self):
@@ -38,13 +46,14 @@ class Home(_Entity, ABC):
         pass
 
 
-class _HueEntity(_Entity, ABC):
+class _HueEntity(_Entity, metaclass=ABCMeta):
     """
     name must be tied to hue entity
     """
 
-    def __init__(self, bridge):
-        self.adapter = self.adapter_class(bridge, self.name)
+    def __init__(self, context):
+        super().__init__(context)
+        self.adapter = self.adapter_class(context.bridge, self.name)
 
     @property
     @abstractmethod
@@ -52,7 +61,7 @@ class _HueEntity(_Entity, ABC):
         pass
 
 
-class Lights(_HueEntity, ABC):
+class Lights(_HueEntity, metaclass=ABCMeta):
     """
     links to hue groups
     these need to store state of timeout
@@ -120,40 +129,42 @@ class Sensor(_HueEntity):
         return self.adapter.dark
 
 
-class GoogleEntity(_Entity):
+class _GoogleEntity(_Entity, ABC):
     pass
 
 
-class GoogleHome(GoogleEntity):
+class GoogleHome(_GoogleEntity):
     pass
 
 
-class Chromecast(GoogleEntity):
+class Chromecast(_GoogleEntity):
     pass
 
 
-class Vacuum(GoogleEntity):
+class Vacuum(_GoogleEntity):
     pass
 
 
-class Room(_Entity, ABC):
-    devices: List[_Entity]
-    devices_dict: Dict[str, _Entity]
+DEVICES = [Lights, Sensor, GoogleHome, Chromecast, Vacuum]
+
+
+class Room(_Entity, metaclass=ABCMeta):
+    devices: Dict[Union[[Type[device] for device in DEVICES]], Union[[device for device in DEVICES]]]
     is_exit: bool = False
 
-    _device_classes: List[Type[_Entity]] = None
-    _connecting_rooms: List[Room] = None
+    @property
+    @abstractmethod
+    def _device_classes(self) -> List[Union[[Type[device] for device in DEVICES]]]:
+        pass
 
-    def __init__(self, bridge):
-        self.devices = []
-        self.devices_dict = {}
+    _connecting_rooms: List[Type[Room]] = None
+
+    def __init__(self, context):
+        super().__init__(context)
+        self.devices = {}
         for device_class in self._device_classes:
-            if issubclass(device_class, _HueEntity):
-                device = device_class(bridge)
-            else:
-                device = device_class()
-            self.devices.append(device)
-            self.devices_dict[device.name] = device
+            device = device_class(context)
+            self.devices[device_class] = device
 
         self._connecting_rooms = []
         self._rules = []
@@ -161,9 +172,6 @@ class Room(_Entity, ABC):
     def __rshift__(self, room):
         room >> self
         self._connecting_rooms.append(room)
-
-    def get_device(self, name):
-        return self.devices_dict[name]
 
     @property
     def connecting_rooms(self):
