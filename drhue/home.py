@@ -23,7 +23,7 @@ class _Entity(metaclass=ABCMeta):
 
 
 class Home(_Entity, metaclass=ABCMeta):
-    rooms: List[Room]
+    rooms: Dict[Type[Room], Room]
 
     @property
     @abstractmethod
@@ -33,16 +33,19 @@ class Home(_Entity, metaclass=ABCMeta):
     def __init__(self, context):
         super().__init__(context)
         self.context.bridge.read()
-        self.rooms = [room(context) for room in self.room_classes]
-        self.rooms_as_dict = {room.name: room for room in self.rooms}
+        self.rooms = {room: room(context) for room in self.room_classes}
+
+    def sync_device_states(self):
+        for room in self.rooms.values():
+            room.sync_device_states()
 
     def run_all_rules(self):
-        for room in self.rooms:
-            room.run_rules()
-        self.run_rules()
+        for room in self.rooms.values():
+            room.room_rules()
+        self.home_rules()
 
     @abstractmethod
-    def run_rules(self):
+    def home_rules(self):
         pass
 
 
@@ -60,6 +63,10 @@ class _HueEntity(_Entity, metaclass=ABCMeta):
     def adapter_class(self):
         pass
 
+    @abstractmethod
+    def sync_state(self):
+        pass
+
 
 class Lights(_HueEntity, metaclass=ABCMeta):
     """
@@ -69,23 +76,41 @@ class Lights(_HueEntity, metaclass=ABCMeta):
     """
     adapter_class = DrHueLights
 
-    # todo: tidy this
-    _on: bool = False
+    ON, OFF = True, False
+    _state: bool = OFF
     _brightness: int = 0
 
-    @property
-    def on(self):
-        if self._on != self.adapter.on:
-            logger.warning("inconsistent state, something happened outside program")
-            self._on = self.adapter.on
-        return self._on
+    def sync_state(self):
+        """
+        if now > timeout, turn off
+        could also do brightness fades here, eg fade out over 30 mins:
+            create array of current birghtness to zero with length 30min*60*refreshrate
+        """
+        pass
 
-    @on.setter
-    def on(self, state):
-        if self._on != self.adapter.on:
+    def on(self, timeout=None, brightness=None, scene=None):
+        self.state = self.ON
+        if timeout is not None:
+            now = self.context.now
+            """
+            if we're storing state here then we need a way to make this state consistent with reality on every read/write
+            
+            """
+        pass
+
+    @property
+    def state(self):
+        if self._state != self.adapter.on:
+            logger.warning("inconsistent state, something happened outside program")
+            self._state = self.adapter.on
+        return self._state
+
+    @state.setter
+    def state(self, state):
+        if self._state != self.adapter.on:
             logger.warning("inconsistent state, something happened outside program")
         self.adapter.on = state
-        self._on = state
+        self._state = state
 
     @property
     def brightness(self):
@@ -112,6 +137,12 @@ class Lights(_HueEntity, metaclass=ABCMeta):
 class Sensor(_HueEntity):
     adapter_class = DrHueSensor
 
+    def sync_state(self):
+        """
+        if sensitivituy different from given then re set it
+        :return:
+        """
+
     @property
     def motion(self):
         return self.adapter.motion
@@ -130,7 +161,8 @@ class Sensor(_HueEntity):
 
 
 class _GoogleEntity(_Entity, ABC):
-    pass
+    def sync_state(self):
+        """todo"""
 
 
 class GoogleHome(_GoogleEntity):
@@ -161,10 +193,7 @@ class Room(_Entity, metaclass=ABCMeta):
 
     def __init__(self, context):
         super().__init__(context)
-        self.devices = {}
-        for device_class in self._device_classes:
-            device = device_class(context)
-            self.devices[device_class] = device
+        self.devices = {device_class: device_class(context) for device_class in self._device_classes}
 
         self._connecting_rooms = []
         self._rules = []
@@ -177,6 +206,10 @@ class Room(_Entity, metaclass=ABCMeta):
     def connecting_rooms(self):
         return self._connecting_rooms
 
+    def sync_device_states(self):
+        for device in self.devices.values():
+            device.sync_state()
+
     @abstractmethod
-    def run_rules(self):
+    def room_rules(self):
         pass

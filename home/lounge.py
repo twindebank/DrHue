@@ -20,7 +20,7 @@ class Chromecast(home.Chromecast):
 
 
 class Boopy(home.Vacuum):
-    name = "boopy"
+    name = "Boopy"
 
 
 class Lounge(home.Room):
@@ -44,7 +44,7 @@ class Lounge(home.Room):
         Boopy
     ]
 
-    def run_rules(self):
+    def room_rules(self):
 
         # if self.context.sunrise < self.context.now < self.context.sunset:
         #     return

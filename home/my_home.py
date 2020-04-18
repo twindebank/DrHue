@@ -66,7 +66,7 @@ class MyHome(Home):
     room_classes = [Lounge]
 
     # do all the fun state tracking in this class/base class
-    def run_rules(self):
+    def home_rules(self):
         pass
 
 
