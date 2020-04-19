@@ -2,7 +2,8 @@ from __future__ import annotations
 from __future__ import annotations
 
 from abc import ABC, abstractmethod, ABCMeta
-from typing import List, Type, Dict, Union
+from datetime import timedelta, datetime
+from typing import List, Type, Dict, Union, Optional, Tuple, Any
 
 from loguru import logger
 
@@ -53,92 +54,125 @@ class _HueEntity(_Entity, metaclass=ABCMeta):
     """
     name must be tied to hue entity
     """
+    adapter_properties: Tuple[Tuple[str, Type, Any]] = ()
 
     def __init__(self, context):
         super().__init__(context)
-        self.adapter = self.adapter_class(context.bridge, self.name)
+        self.adapter = self._adapter_class(context.bridge, self.name)
+
+        def create_getter(prop):
+            return lambda self: self.__class__._property_getter(self, prop)
+
+        def create_setter(prop):
+            return lambda self, val: self.__class__._property_setter(self, prop, val)
+
+        for (prop, prop_type, default_val) in self.adapter_properties:
+            setattr(
+                self.__class__,
+                f"_{prop}",
+                default_val
+            )
+            setattr(
+                self.__class__,
+                prop,
+                property(
+                    fget=create_getter(prop),
+                    fset=create_setter(prop)
+                )
+            )
 
     @property
     @abstractmethod
-    def adapter_class(self):
+    def _adapter_class(self):
         pass
 
-    @abstractmethod
     def sync_state(self):
-        pass
+        for (prop, *_) in self.adapter_properties:
+            if not self._check_consistency(prop):
+                setattr(self, f"_{prop}", getattr(self.adapter, prop))
+            self._check_consistency(prop)
+
+    def _property_getter(self, prop):
+        return getattr(self, f"_{prop}")
+
+    def _property_setter(self, prop, val):
+        logger.debug(f"Changing '{self.name}' {prop} to '{val}'.")
+        setattr(self.adapter, prop, val)
+        setattr(self, f"_{prop}", val)
+
+    def _check_consistency(self, prop):
+        """
+        todo: bug here
+        if light turned on and then off,
+        adapter remains in same state but entity changes  so consistency checks fail
+        dont need to do multiple coinsistency checks, just need to do on read
+        :param prop:
+        :return:
+        """
+        entity_state = getattr(self, f"_{prop}")
+        adapter_state = getattr(self.adapter, prop)
+        if adapter_state != entity_state:
+            logger.warning(
+                f"Inconsistent state in '{self.name}' for property '{prop}':"
+                f"\n\tentity: {entity_state}\n\tadapter: {adapter_state}"
+            )
+            return False
+        return True
 
 
 class Lights(_HueEntity, metaclass=ABCMeta):
     """
     links to hue groups
     these need to store state of timeout
-    needs to store things like relax/read
     """
-    adapter_class = DrHueLights
 
-    ON, OFF = True, False
-    _state: bool = OFF
-    _brightness: int = 0
+    adapter_properties = (
+        ('on', bool, False),
+        ('brightness', int, 1),
+        ('scene', Optional[str], None),
+    )
+
+    _timeout: Optional[datetime] = None
+
+    _adapter_class = DrHueLights
 
     def sync_state(self):
         """
         if now > timeout, turn off
         could also do brightness fades here, eg fade out over 30 mins:
             create array of current birghtness to zero with length 30min*60*refreshrate
+
         """
-        pass
+        super().sync_state()
+        if self._timeout is not None and self.context.now > self._timeout:
+            logger.debug(f"'{self.name}' timed out, switching off.")
+            self.on = False
+            self._timeout = None
 
-    def on(self, timeout=None, brightness=None, scene=None):
-        self.state = self.ON
-        if timeout is not None:
-            now = self.context.now
-            """
-            if we're storing state here then we need a way to make this state consistent with reality on every read/write
-            
-            """
-        pass
+    def turn_on(self, timeout_mins=None, brightness=None, scene=None):
+        self.on = True
+        if timeout_mins is not None:
+            self.set_timeout(timeout_mins)
+        if brightness is not None:
+            self.brightness = brightness
+        if scene:
+            self.scene = scene
 
-    @property
-    def state(self):
-        if self._state != self.adapter.on:
-            logger.warning("inconsistent state, something happened outside program")
-            self._state = self.adapter.on
-        return self._state
+    def turn_off(self):
+        self.on = False
+        self.scene = None
+        self.brightness = 1
 
-    @state.setter
-    def state(self, state):
-        if self._state != self.adapter.on:
-            logger.warning("inconsistent state, something happened outside program")
-        self.adapter.on = state
-        self._state = state
-
-    @property
-    def brightness(self):
-        if self._brightness != self.adapter.brightness:
-            logger.info("inconsistent state, something happened outside program")
-            self._brightness = self.adapter.brightness
-        return self._brightness
-
-    @brightness.setter
-    def brightness(self, brightness):
-        self.adapter.brightness = brightness
-        self._brightness = brightness
-
-    def timeout(self, timedelta):
-        pass
-
-    def relax(self):
-        pass
-
-    def read(self):
-        pass
+    def set_timeout(self, timeout_mins):
+        self._timeout = self.context.now + timedelta(minutes=timeout_mins)
 
 
 class Sensor(_HueEntity):
-    adapter_class = DrHueSensor
+    _adapter_class = DrHueSensor
 
     def sync_state(self):
         """
+        store historical states here
         if sensitivituy different from given then re set it
         :return:
         """

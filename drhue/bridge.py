@@ -44,8 +44,11 @@ class DrHueBridge:
         req.raise_for_status()
         self.bridge_data = req.json()
 
-    def set(self, entity_path, payload):
-        self.staged_changes.setdefault(entity_path, {}).update(payload)
+    def set(self, entity_path, payload, update=True):
+        if update:
+            self.staged_changes.setdefault(entity_path, {}).update(payload)
+        else:
+            self.staged_changes[entity_path] = payload
 
     def write(self):
         for entity_path, payload in self.staged_changes.items():
@@ -75,8 +78,8 @@ class _DrHueAdapter(ABC):
         self._bridge = bridge
         self.name = name
 
-    def stage_changes(self, payload):
-        self._bridge.set(self.entity_action_path, payload)
+    def stage_changes(self, payload, update=True):
+        self._bridge.set(self.entity_action_path, payload, update)
 
     @property
     @abstractmethod
@@ -159,12 +162,24 @@ class DrHueLights(_DrHueAdapter):
         return group_key
 
     @property
+    def light_ids(self):
+        return tuple(sorted(self._bridge.bridge_data['groups'][self.group_key]['lights']))
+
+    @property
+    def light_states(self):
+        light_states = {}
+        for light_id in self.light_ids:
+            light_states[light_id] = self._bridge.bridge_data['lights'][light_id]['state']
+        return light_states
+
+    @property
     def on(self):
         return self._bridge.bridge_data['groups'][self.group_key]['action']['on']
 
     @on.setter
     def on(self, state):
-        self.stage_changes({"on": state})
+        """if state is off then dont set scenes or anything"""
+        self.stage_changes({"on": state}, update=state)
 
     @property
     def brightness(self):
@@ -172,5 +187,50 @@ class DrHueLights(_DrHueAdapter):
 
     @brightness.setter
     def brightness(self, brightness):
-        """0-254"""
+        """1-254"""
         self.stage_changes({"bri": brightness})
+
+    @property
+    def _scene_lookup(self):
+        return {scene_info['name'] + str(tuple(sorted(scene_info['lights']))): scene_id for scene_id, scene_info in
+                self._bridge.bridge_data['scenes'].items()}
+
+    def _get_scene_id(self, scene_name):
+        try:
+            return self._scene_lookup[scene_name + str(self.light_ids)]
+        except KeyError:
+            logger.error(f"Scene '{scene_name}' not found for group {self.name}.")
+
+    @property
+    def scene(self):
+        scenes_for_room = {scene_id: scene for scene_id, scene in self._bridge.bridge_data['scenes'].items() if
+                           tuple(sorted(scene['lights'])) == self.light_ids}
+        for scene_id, scene in scenes_for_room.items():
+            req = requests.get(f"{self._bridge.api_path}/scenes/{scene_id}")
+            req.raise_for_status()
+            scene_with_light_states = req.json()
+            light_states_for_scene = scene_with_light_states['lightstates']  # on bri xy
+            light_states = self.light_states
+            match = False
+            for light_id, light_state_for_scene in light_states_for_scene.items():
+                light_state = light_states[light_id]
+                for state in light_state_for_scene:
+                    if light_state[state] != light_state_for_scene[state]:
+                        match = False
+                        break
+                    match = True
+                if match:
+                    break
+            if match:
+                return scene['name']
+        return None
+
+    @scene.setter
+    def scene(self, scene_name):
+        """Relax, Read, Concentrate, ..."""
+        if not scene_name:
+            return
+
+        scene_id = self._get_scene_id(scene_name)
+        if scene_id:
+            self.stage_changes({"scene": scene_id})

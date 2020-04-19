@@ -60,7 +60,7 @@ class Lounge(home.Room):
 
         if self.devices[LoungeSensor].motion:
             logger.debug("Motion detected.")
-            self.devices[LoungeLights].on = True
-        else:
-            logger.debug("Motion not detected.")
-            self.devices[LoungeLights].on = False
+            self.devices[LoungeLights].turn_on(scene='Relax', timeout_mins=1)
+        # else:
+        #     logger.debug("Motion not detected.")
+        #     self.devices[LoungeLights].turn_off()
