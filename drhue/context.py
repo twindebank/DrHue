@@ -1,22 +1,19 @@
 import datetime
+from dataclasses import dataclass
 
 import pytz
 from astral import LocationInfo
 from astral.sun import sun
 
+from drhue.bridge import DrHueBridge
 
+
+@dataclass
 class Context:
-    dawn: datetime.time
-    sunrise: datetime.time
-    noon: datetime.time
-    sunset: datetime.time
-    dusk: datetime.time
-    bedtime: datetime.time
-
-    def __init__(self, bridge, bedtime=datetime.time(hour=23, minute=45)):
-        self.bridge = bridge
-        self.bedtime = bedtime
-        self._city = LocationInfo("London", "England", "Europe/London", 51.5, -0.116)
+    bridge: DrHueBridge
+    bedtime: datetime.time = datetime.time(hour=23, minute=45)
+    city: LocationInfo = LocationInfo("London", "England", "Europe/London", 51.5, -0.116)
+    refresh_interval: int = 5
 
     def __getattr__(self, item):
         if item in ['dawn', 'sunrise', 'noon', 'sunset', 'dusk']:

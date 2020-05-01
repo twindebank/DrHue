@@ -1,6 +1,6 @@
 from drhue.home import Home
-from home.lounge import Lounge
 
+from home.lounge import lounge
 
 #
 # def init_rooms():
@@ -61,12 +61,13 @@ from home.lounge import Lounge
 #     ]
 #     return rooms
 
-class MyHome(Home):
-    name = "My home"
-    room_classes = [Lounge]
+# class MyHome(Home):
+#     name = "My home"
+#     room_classes = [Lounge]
+#
+#     # do all the fun state tracking in this class/base class
+#     def home_rules(self):
+#         pass
 
-    # do all the fun state tracking in this class/base class
-    def home_rules(self):
-        pass
 
 

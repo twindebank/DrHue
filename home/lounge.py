@@ -1,29 +1,16 @@
 from loguru import logger
 
-import drhue.home as home
+from drhue.entities.google import GoogleHome, Chromecast, Vacuum
+from drhue.entities.lights import Lights
+from drhue.entities.room import Room
+from drhue.entities.sensor import Sensor
+from drhue.rule import Rule
+
+lights = Lights(name='Lounge')
+sensor = Sensor(name='Lounge sensor')
 
 
-class LoungeLights(home.Lights):
-    name = "Lounge"
-
-
-class LoungeSensor(home.Sensor):
-    name = "Lounge sensor"
-
-
-class LoungeSpeaker(home.GoogleHome):
-    name = "Lounge speaker"
-
-
-class Chromecast(home.Chromecast):
-    name = "Telly"
-
-
-class Boopy(home.Vacuum):
-    name = "Boopy"
-
-
-class Lounge(home.Room):
+class LoungeRules(Rule):
     """
     eventually:
     come on first in eve as light starts to dip with read
@@ -32,20 +19,9 @@ class Lounge(home.Room):
     then relax
     then off when bed
     dim when come down in night
-
-
     """
-    name = 'Lounge'
-    _device_classes = [
-        LoungeLights,
-        LoungeSensor,
-        LoungeSpeaker,
-        Chromecast,
-        Boopy
-    ]
 
-    def room_rules(self):
-
+    def apply(self):
         # if self.context.sunrise < self.context.now < self.context.sunset:
         #     return
 
@@ -58,9 +34,22 @@ class Lounge(home.Room):
 
         # elif time between bedtime and dawn next day
 
-        if self.devices[LoungeSensor].motion:
+        if sensor.read('motion'):
             logger.debug("Motion detected.")
-            self.devices[LoungeLights].turn_on(scene='Relax', timeout_mins=1)
+            lights.turn_on(scene='Relax', timeout_mins=1)
         # else:
         #     logger.debug("Motion not detected.")
         #     self.devices[LoungeLights].turn_off()
+
+
+lounge = Room(
+    name='Lounge',
+    devices=[
+        lights,
+        sensor,
+        GoogleHome(name='Lounge speaker'),
+        Chromecast(name='Telly'),
+        Vacuum(name='Boopy')
+    ],
+    rules=[LoungeRules]
+)

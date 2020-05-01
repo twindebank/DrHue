@@ -1,0 +1,51 @@
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Optional, List, Type
+
+from loguru import logger
+
+from drhue.adapter.lights import DrHueLights
+from drhue.entities.base import HueEntity, AdapterProperty
+from drhue.helpers import default_field
+
+
+@dataclass
+class Lights(HueEntity):
+    adapter_properties: List[AdapterProperty] = default_field([
+        AdapterProperty('on', bool, default=False),
+        AdapterProperty('brightness', int, default=1),
+        AdapterProperty('scene', str),
+    ])
+
+    _active_timeout: Optional[datetime] = None
+    _adapter_class: Type[DrHueLights] = DrHueLights
+
+    def sync_state(self):
+        """
+        if now > timeout, turn off
+        could also do brightness fades here, eg fade out over 30 mins:
+            create array of current birghtness to zero with length 30min*60*refreshrate
+
+        """
+        super().sync_state()
+        if self._active_timeout is not None and self.context.now > self._active_timeout:
+            logger.debug(f"'{self.name}' timed out, switching off.")
+            self.set('on', False)
+            self._active_timeout = None
+
+    def turn_on(self, timeout_mins=None, brightness=None, scene=None):
+        self.set('on', True)
+        if timeout_mins is not None:
+            self.set_timeout(timeout_mins)
+        if brightness is not None:
+            self.set('brightness', brightness)
+        if scene:
+            self.set('scene', scene)
+
+    def turn_off(self):
+        self.set('on', False)
+        self.set('scene', None)
+        self.set('brightness', 1)
+
+    def set_timeout(self, timeout_mins):
+        self._active_timeout = self.context.now + timedelta(minutes=timeout_mins)
