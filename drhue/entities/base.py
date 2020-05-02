@@ -101,4 +101,4 @@ class HueEntity(Entity, metaclass=ABCMeta):
         setattr(self._adapter, prop_name, val)
 
     def read(self, prop):
-        return self._entity_property_dict[prop].value
+        return self._entity_property_dict[prop].read()

@@ -1,5 +1,3 @@
-from loguru import logger
-
 from drhue.entities.google import GoogleHome, Chromecast, Vacuum
 from drhue.entities.lights import Lights
 from drhue.entities.room import Room
@@ -33,13 +31,21 @@ class LoungeRules(Rule):
         # activate read with timeout of 1 hour
 
         # elif time between bedtime and dawn next day
+        if self.context.sunrise < self.context.now < self.context.sunset:
+            pass
 
-        if sensor.read('motion'):
-            logger.indo("Motion detected.")
-            lights.turn_on(scene='Relax', timeout_mins=1)
-        # else:
-        #     logger.debug("Motion not detected.")
-        #     self.devices[LoungeLights].turn_off()
+        if self.context.sunset < self.context.now < self.context.dusk:
+            if sensor.read('motion'):
+                lights.turn_on(scene='Read', timeout_mins=30)
+
+        if self.context.dusk < self.context.now < self.context.bedtime:
+            if sensor.read('motion') and not sensor.read('daylight') and sensor.read('dark'):
+                lights.turn_on(scene='Relax', timeout_mins=60)
+
+        if self.context.bedtime < self.context.now < self.context.sunrise:
+            if not lights.read('on'):
+                if sensor.read('motion') and not sensor.read('daylight') and sensor.read('dark'):
+                    lights.turn_on(scene='Dimmed', timeout_mins=5)
 
 
 lounge = Room(

@@ -3,7 +3,7 @@ import datetime
 from drhue.bridge import DrHueBridge
 from drhue.context import Context
 from drhue.entities.home import Home
-from home.lounge import lounge
+from example.home.lounge import lounge
 
 
 def run_main_loop():
