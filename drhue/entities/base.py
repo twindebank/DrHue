@@ -15,10 +15,10 @@ from drhue.rule import Rule
 class Entity(metaclass=ABCMeta):
     name: str
     rules: List[Type[Rule]] = field(default_factory=list)
-    sub_entities: List[Type[Entity]] = field(default_factory=list)
-
+    sub_entities: List[Entity] = field(default_factory=list)
     context: Context = None
-    _sorted_rules: List[Type[Rule]] = None
+
+    _sorted_rules: List[Rule] = None
 
     def __hash__(self):
         return hash(self.name)
