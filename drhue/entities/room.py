@@ -1,13 +1,12 @@
 from dataclasses import dataclass, field
-from typing import Union, List, Type
+from typing import List, Type
 
-from drhue.entities.base import Entity, HueEntity
-from drhue.entities.google import GoogleEntity
+from drhue.entities.base import Entity
 
 
 @dataclass
 class Room(Entity):
-    devices: List[Type[Union[HueEntity, GoogleEntity, Entity]]] = field(default_factory=list)
+    devices: List[Entity] = field(default_factory=list)
     is_exit: bool = False
 
     def __post_init__(self):

@@ -5,31 +5,31 @@ from typing import Optional, List, Type
 from loguru import logger
 
 from drhue.adapter.lights import DrHueLights
-from drhue.entities.base import HueEntity, AdapterProperty
+from drhue.entities.base import HueEntity, EntityProperty
 from drhue.helpers import default_field
 
 
 @dataclass
 class Lights(HueEntity):
-    adapter_properties: List[AdapterProperty] = default_field([
-        AdapterProperty('on', bool, default=False),
-        AdapterProperty('brightness', int, default=1),
-        AdapterProperty('scene', str),
+    _entity_properties: List[EntityProperty] = default_field([
+        EntityProperty('on', bool, default=False),
+        EntityProperty('brightness', int, default=1),
+        EntityProperty('scene', str),
     ])
 
     _active_timeout: Optional[datetime] = None
     _adapter_class: Type[DrHueLights] = DrHueLights
 
-    def sync_state(self):
+    def sync_states(self):
         """
         if now > timeout, turn off
         could also do brightness fades here, eg fade out over 30 mins:
             create array of current birghtness to zero with length 30min*60*refreshrate
 
         """
-        super().sync_state()
+        super().sync_states()
         if self._active_timeout is not None and self.context.now > self._active_timeout:
-            logger.debug(f"'{self.name}' timed out, switching off.")
+            logger.info(f"'{self.name}' timed out, switching off.")
             self.set('on', False)
             self._active_timeout = None
 

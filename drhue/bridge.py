@@ -28,7 +28,7 @@ class DrHueBridge:
         return os.getenv("HUE_USERNAME")
 
     def read(self):
-        logger.info("Receiving new data from hub...")
+        logger.debug("Receiving new data from hub...")
         req = requests.get(self.api_path)
         req.raise_for_status()
         self.bridge_data = req.json()

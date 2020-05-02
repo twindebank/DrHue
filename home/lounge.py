@@ -35,7 +35,7 @@ class LoungeRules(Rule):
         # elif time between bedtime and dawn next day
 
         if sensor.read('motion'):
-            logger.debug("Motion detected.")
+            logger.indo("Motion detected.")
             lights.turn_on(scene='Relax', timeout_mins=1)
         # else:
         #     logger.debug("Motion not detected.")
