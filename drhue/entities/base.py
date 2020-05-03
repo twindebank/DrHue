@@ -30,13 +30,28 @@ class Entity(metaclass=ABCMeta):
         return rules
 
     def sync_states(self):
+        """
+        Sync the state of this entity, and sub entities, with the actual hardware they represent.
+        By default this will only call this method for sub entities, the sync needs to be implemented in _sync_states.
+        """
         for entity in self.sub_entities:
             entity.sync_states()
+        self._sync_states()
 
     def attach_context(self, context: Context):
+        """
+        Add the Context instance to this entity and call the method on any sub entities.
+        """
         self.context = context
         for sub_entity in self.sub_entities:
             sub_entity.attach_context(context)
+        self._attach_context(context)
+
+    def _sync_states(self):
+        """Override this to implement state syncing for the given entity."""
+
+    def _attach_context(self, context: Context):
+        """If the entity needs to do something with the Context instance when it is added, implement this method."""
 
     @property
     def sorted_rules(self) -> List[Rule]:
@@ -45,7 +60,7 @@ class Entity(metaclass=ABCMeta):
         return self._sorted_rules
 
 
-@dataclass()
+@dataclass
 class EntityProperty:
     name: str
     value_type: Type
@@ -67,7 +82,7 @@ class EntityProperty:
 @dataclass
 class HueEntity(Entity, metaclass=ABCMeta):
     """
-    name must be tied to hue entity
+    Manage syncing states between adapter and entity.
     """
     _entity_properties: List[EntityProperty] = None
     _adapter: DrHueAdapter = None
@@ -77,12 +92,12 @@ class HueEntity(Entity, metaclass=ABCMeta):
     def __post_init__(self):
         self._entity_property_dict = {prop.name: prop for prop in self._entity_properties}
 
-    def attach_context(self, context: Context):
-        super().attach_context(context)
+    def _attach_context(self, context: Context):
+        """Need to initialise the adapter after attaching context."""
         self._adapter = self._adapter_class(bridge=self.context.bridge, name=self.name)
 
-    def sync_states(self):
-        super().sync_states()
+    def _sync_states(self):
+        """Ensure entity is in sync with device adapter after reading data from bridge."""
         for prop in self._entity_properties:
             adapter_state = getattr(self._adapter, prop.name)
             entity_state = prop.read()
@@ -97,7 +112,7 @@ class HueEntity(Entity, metaclass=ABCMeta):
         entity_property = self._entity_property_dict[prop_name]
         if entity_property.read_only:
             raise ValueError(f"Cannot mutate read only property '{prop_name}' for '{self.name}'.")
-        entity_property.set(val)
+        entity_property.stage_change(val)
         setattr(self._adapter, prop_name, val)
 
     def read(self, prop):

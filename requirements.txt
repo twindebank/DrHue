@@ -1,1 +1,6 @@
-loguru
+loguru~=0.4.1
+requests~=2.23.0
+deepmerge~=0.1.0
+pytz~=2019.3
+astral~=2.1
+pytest~=5.4.1

@@ -20,15 +20,14 @@ class Lights(HueEntity):
     _active_timeout: Optional[datetime] = None
     _adapter_class: Type[DrHueLights] = DrHueLights
 
-    def sync_states(self):
+    def _sync_states(self):
         """
         if now > timeout, turn off
         could also do brightness fades here, eg fade out over 30 mins:
             create array of current birghtness to zero with length 30min*60*refreshrate
 
         """
-        super().sync_states()
-        if self._active_timeout is not None and self.context.now > self._active_timeout:
+        if self._active_timeout is not None and self.context.times.now > self._active_timeout:
             logger.info(f"'{self.name}' timed out, switching off.")
             self.set('on', False)
             self._active_timeout = None

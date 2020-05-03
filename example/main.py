@@ -27,7 +27,6 @@ def run_main_loop():
             office,
             toilet,
             bedroom
-
         ]
     )
     home.attach_context(context)

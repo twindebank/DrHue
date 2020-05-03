@@ -122,7 +122,7 @@ class Context:
         self.times = Times(self.city, self.bedtime, self.wakeup, self.timezone)
 
     def update_and_wait(self):
-        self.bridge.write()
+        self.bridge.write_to_bridge()
         time.sleep(self.refresh_interval)
         self.times.update()
-        self.bridge.read()
+        self.bridge.read_data_from_bridge()
