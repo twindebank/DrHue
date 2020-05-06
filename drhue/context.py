@@ -3,13 +3,29 @@ import time
 from dataclasses import dataclass
 
 import pytz
-from astral import LocationInfo, SunDirection
-from astral.sun import sun, golden_hour, blue_hour
+from astral import LocationInfo
+from astral.sun import sun
 
 from drhue.bridge import DrHueBridge
 
 
-@dataclass()
+@dataclass
+class Time:
+    name: str
+
+
+dawn = Time('dawn')
+sunrise = Time('sunrise')
+noon = Time('noon')
+sunset = Time('sunset')
+dusk = Time('dusk')
+day_end = Time('day_end')
+day_start = Time('day_start')
+bedtime = Time('bedtime_datetime')
+wakeup = Time('wakeup_datetime')
+
+
+@dataclass
 class Times:
     """
     todo: implement cache
@@ -25,45 +41,48 @@ class Times:
     def __post_init__(self):
         self.update()
 
-    def update(self, dt=None):
-        self.now = datetime.datetime.now(tz=self.timezone) if dt is None else dt
+    def update(self, dt=None, offset=datetime.timedelta(0)):
+        self.now = datetime.datetime.now(tz=self.timezone) + offset if dt is None else dt + offset
         self.sun = sun(self.city.observer, date=self.now, tzinfo=self.timezone)
 
-    def is_after_bedtime(self, dt=None):
-        dt = self.now if dt is None else dt
-        return self.bedtime_datetime < dt < self.day_end or self.day_start < dt < self.wakeup_datetime
-
-    def is_after_sunset(self, dt=None):
-        dt = self.now if dt is None else dt
-        return self.sunset < dt < self.day_end or self.day_start < dt < self.sunrise
-
-    def is_evening_golden_hour(self, dt=None):
-        dt = self.now if dt is None else dt
-        start, end = golden_hour(self.city.observer, self.now, tzinfo=self.timezone, direction=SunDirection.SETTING)
-        return start < dt < end
-
-    def is_after_evening_golden_hour(self, dt=None):
-        dt = self.now if dt is None else dt
-        start, end = golden_hour(self.city.observer, self.now, tzinfo=self.timezone, direction=SunDirection.SETTING)
-        return end < dt < self.day_end
-
-    def is_before_evening_golden_hour(self, dt=None):
-        return not self.is_after_evening_golden_hour(dt)
-
-    def is_evening_blue_hour(self, dt=None):
-        dt = self.now if dt is None else dt
-        start, end = blue_hour(self.city.observer, self.now, tzinfo=self.timezone, direction=SunDirection.SETTING)
-        return start < dt < end
-
-    def is_morning_golden_hour(self, dt=None):
-        dt = self.now if dt is None else dt
-        start, end = golden_hour(self.city.observer, self.now, tzinfo=self.timezone, direction=SunDirection.RISING)
-        return start < dt < end
-
-    def is_morning_blue_hour(self, dt=None):
-        dt = self.now if dt is None else dt
-        start, end = blue_hour(self.city.observer, self.now, tzinfo=self.timezone, direction=SunDirection.RISING)
-        return start < dt < end
+    # def _is_in_interval(self, lower, upper, dt=None, lower_offset=datetime.timedelta(0),
+    #                     upper_offset=datetime.timedelta(0)):
+    #     dt = self.now if dt is None else dt
+    #     return lower + lower_offset < dt < upper + upper_offset
+    #
+    # def is_after_bedtime(self, dt=None, lower_offset=None, upper_offset=None):
+    #     return self._is_in_interval(self.bedtime_datetime, self.day_end, dt, lower_offset, upper_offset) or \
+    #            self._is_in_interval(self.day_start, self.wakeup_datetime, dt, lower_offset, upper_offset)
+    #
+    # def is_after_sunset(self, dt=None, lower_offset=None, upper_offset=None):
+    #     return self._is_in_interval(self.sunset, self.day_end, dt, lower_offset, upper_offset)
+    #
+    # def is_before_sunset(self, lower_bound=None, dt=None, lower_offset=None, upper_offset=None):
+    #     lower_bound = self.sunrise if lower_bound is None else self.sunrise
+    #     return self._is_in_interval(lower_bound, self.sunset, dt, lower_offset, upper_offset)
+    #
+    # def is_evening_golden_hour(self, dt=None, lower_offset=None, upper_offset=None):
+    #     start, end = golden_hour(self.city.observer, self.now, tzinfo=self.timezone, direction=SunDirection.SETTING)
+    #     return self._is_in_interval(start, end, dt, lower_offset, upper_offset)
+    #
+    # def is_after_evening_golden_hour(self, dt=None, lower_offset=None, upper_offset=None):
+    #     start, end = golden_hour(self.city.observer, self.now, tzinfo=self.timezone, direction=SunDirection.SETTING)
+    #     return self._is_in_interval(end, self.day_end, dt, lower_offset, upper_offset)
+    #
+    # def is_before_evening_golden_hour(self, dt=None, lower_offset=None, upper_offset=None):
+    #     return not self.is_after_evening_golden_hour(dt)
+    #
+    # def is_evening_blue_hour(self, dt=None, lower_offset=None, upper_offset=None):
+    #     start, end = blue_hour(self.city.observer, self.now, tzinfo=self.timezone, direction=SunDirection.SETTING)
+    #     return self._is_in_interval(start, end, dt, lower_offset, upper_offset)
+    #
+    # def is_morning_golden_hour(self, dt=None, lower_offset=None, upper_offset=None):
+    #     start, end = golden_hour(self.city.observer, self.now, tzinfo=self.timezone, direction=SunDirection.RISING)
+    #     return self._is_in_interval(start, end, dt, lower_offset, upper_offset)
+    #
+    # def is_morning_blue_hour(self, dt=None, lower_offset=None, upper_offset=None):
+    #     start, end = blue_hour(self.city.observer, self.now, tzinfo=self.timezone, direction=SunDirection.RISING)
+    #     return self._is_in_interval(start, end, dt, lower_offset, upper_offset)
 
     @property
     def dawn(self):

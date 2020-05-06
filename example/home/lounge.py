@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from drhue.entities.google import GoogleHome, Chromecast, Vacuum
 from drhue.entities.lights import Lights
 from drhue.entities.room import Room
@@ -20,11 +22,14 @@ class LoungeRules(Rule):
     """
 
     def apply(self):
-        if self.context.times.is_before_evening_golden_hour():
+        if self.context.times.is_before_sunset(
+                lower_bound=self.context.times.bedtime_datetime,
+                offset=timedelta(minutes=-60)
+        ):
             if sensor.read('motion') and sensor.read('dark'):
                 lights.turn_on(scene='Read', timeout_mins=15)
 
-        if self.context.times.is_evening_golden_hour():
+        if self.context.times.is_after_sunset():
             if sensor.read('motion'):
                 lights.turn_on(scene='Read', timeout_mins=30)
 
