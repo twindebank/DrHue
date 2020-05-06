@@ -1,4 +1,4 @@
-# ToDo
+# ToDo v1
 
 1. finish tests
 2. write rules for all rooms
@@ -8,7 +8,7 @@
 
 
 # Further work
-- more docs
+- more docs/proper readme
 - split up example out of repo
 - put onto pypi
 - integrate with google devices
