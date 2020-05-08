@@ -40,7 +40,7 @@ class DrHueBridge:
 
     @staticmethod
     def _get_username():
-        return os.getenv("HUE_USERNAME").strip()
+        return os.environ["HUE_USERNAME"].strip()
 
     def read_data_from_bridge(self):
         data = self.get()
@@ -79,7 +79,8 @@ class DrHueBridge:
         return r.json()
 
     def get(self, relative_path=''):
-        logger.debug(f"Reading '{relative_path}' from bridge...")
+        path_str = f' ({relative_path})' if relative_path else ''
+        logger.debug(f"Reading from bridge{path_str}...")
         data = self._get(relative_path)
         if isinstance(data, list):
             for val in data:

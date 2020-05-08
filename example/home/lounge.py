@@ -1,46 +1,57 @@
-from datetime import timedelta
-
+from drhue import times
 from drhue.entities.google import GoogleHome, Chromecast, Vacuum
 from drhue.entities.lights import Lights
 from drhue.entities.room import Room
 from drhue.entities.sensor import Sensor
-from drhue.rule import Rule
+from drhue.rules import Rule, Rules
 
 lights = Lights(name='Lounge')
 sensor = Sensor(name='Lounge sensor')
 
 
-class LoungeRules(Rule):
-    """
-    eventually:
-    come on first in eve as light starts to dip with read
-    then fade into relax
-    then read when dinner
-    then relax
-    then off when bed
-    dim when come down in night
-    """
+class EarlyMorning(Rule):
+    start = times.day_start
+    end = times.wakeup
 
     def apply(self):
-        if self.context.times.is_before_sunset(
-                lower_bound=self.context.times.bedtime_datetime,
-                offset=timedelta(minutes=-60)
-        ):
-            if sensor.read('motion') and sensor.read('dark'):
-                lights.turn_on(scene='Read', timeout_mins=15)
+        if sensor.read('motion') and sensor.read('dark'):
+            lights.turn_on(scene='Dimmed', timeout_mins=5)
 
-        if self.context.times.is_after_sunset():
-            if sensor.read('motion'):
-                lights.turn_on(scene='Read', timeout_mins=30)
 
-        if self.context.times.is_after_evening_golden_hour():
-            if sensor.read('motion') and not sensor.read('daylight') and sensor.read('dark'):
-                lights.turn_on(scene='Relax', timeout_mins=60)
+class Daytime(Rule):
+    start = times.wakeup
+    end = times.sunset.add_offset(hours=-1)
 
-        if self.context.times.is_after_bedtime():
-            if not lights.read('on'):
-                if sensor.read('motion') and sensor.read('dark'):
-                    lights.turn_on(scene='Dimmed', timeout_mins=5)
+    def apply(self):
+        if sensor.read('motion') and sensor.read('dark'):
+            lights.turn_on(scene='Read', timeout_mins=15)
+
+
+class Evening(Rule):
+    start = times.sunset.add_offset(hours=-1)
+    end = times.sunset.add_offset(minutes=30)
+
+    def apply(self):
+        if sensor.read('motion'):
+            lights.turn_on(scene='Read', timeout_mins=30)
+
+
+class Night(Rule):
+    start = times.sunset.add_offset(minutes=30)
+    end = times.bedtime
+
+    def apply(self):
+        if sensor.read('motion'):
+            lights.turn_on(scene='Read', timeout_mins=30)
+
+
+class LateNight(EarlyMorning):
+    start = times.bedtime
+    end = times.day_end
+
+
+class LoungeRules(Rules):
+    rules = [EarlyMorning, Daytime, Evening, Night, LateNight]
 
 
 lounge = Room(
