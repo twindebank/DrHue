@@ -14,7 +14,6 @@ class Awake(Rule):
 
     def apply(self):
         if sensor.read('motion') and sensor.read('dark'):
-            print('herer')
             lights.turn_on(scene='Bright', timeout_mins=5)
 
 

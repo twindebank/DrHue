@@ -61,7 +61,7 @@ class DrHueBridge:
             err = False
             for msg in status_msgs:
                 if 'error' in msg:
-                    print(msg['error'])
+                    logger.warning(msg['error'])
                     err = True
             if err:
                 raise RuntimeError()
