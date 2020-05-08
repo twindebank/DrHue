@@ -10,4 +10,4 @@ def start_server():
     def hello_world():
         return 'Running!'
 
-    app.run(port=8080)
+    app.run(port=8080, host='0.0.0.0')
