@@ -14,6 +14,7 @@ See how to use this code in the [example](example) directory.
 
 ### ToDo
 
+1. Monitoring, expose a http ui
 1. Figure out better deployment pipeline to Pi.
 1. Finish test suite.
 1. Simplify rule classes and hide details.
