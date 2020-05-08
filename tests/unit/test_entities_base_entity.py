@@ -37,6 +37,7 @@ def test_rules_gathering():
         class RuleN(Rules):
             priority = n
             rules = []
+
             def apply(self):
                 pass
 
