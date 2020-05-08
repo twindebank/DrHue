@@ -47,4 +47,4 @@ class Lights(HueEntity):
         self.set('brightness', 1)
 
     def set_timeout(self, timeout_mins):
-        self._active_timeout = self.context.now + timedelta(minutes=timeout_mins)
+        self._active_timeout = self.context.times.now + timedelta(minutes=timeout_mins)

@@ -34,7 +34,6 @@ class DrHueSensor(DrHueAdapter):
 
     @property
     def entity_action_path(self):
-        """Read only interface for now."""
         raise NotImplementedError()
 
     @property

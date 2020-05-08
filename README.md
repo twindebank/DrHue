@@ -1,6 +1,7 @@
 # ToDo v1
 
 1. finish tests
+1. simplify rules/hide details
 2. write rules for all rooms
 3. set up on pi
 4. run!!

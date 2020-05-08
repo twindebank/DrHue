@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABCMeta
+from abc import ABCMeta, ABC
 from dataclasses import dataclass, field
 from typing import Type, List, Any, Optional, Dict
 
@@ -8,22 +8,22 @@ from loguru import logger
 
 from drhue.adapter.base import DrHueAdapter
 from drhue.context import Context
-from drhue.rule import Rule
+from drhue.rules import Rules
 
 
 @dataclass
-class Entity(metaclass=ABCMeta):
+class Entity(ABC):
     name: str
-    rules: List[Type[Rule]] = field(default_factory=list)
+    rules: List[Type[Rules]] = field(default_factory=list)
     sub_entities: List[Entity] = field(default_factory=list)
     context: Context = None
 
-    _sorted_rules: List[Rule] = None
+    _sorted_rules: List[Rules] = None
 
     def __hash__(self):
         return hash(self.name)
 
-    def gather_rules(self) -> List[Rule]:
+    def gather_rules(self) -> List[Rules]:
         rules = [rule(entity=self) for rule in self.rules]
         for sub_entity in self.sub_entities:
             rules.extend(sub_entity.gather_rules())
@@ -54,7 +54,7 @@ class Entity(metaclass=ABCMeta):
         """If the entity needs to do something with the Context instance when it is added, implement this method."""
 
     @property
-    def sorted_rules(self) -> List[Rule]:
+    def sorted_rules(self) -> List[Rules]:
         if self._sorted_rules is None:
             self._sorted_rules = sorted(self.gather_rules(), key=lambda rule: rule.priority)
         return self._sorted_rules
@@ -112,7 +112,7 @@ class HueEntity(Entity, metaclass=ABCMeta):
         entity_property = self._entity_property_dict[prop_name]
         if entity_property.read_only:
             raise ValueError(f"Cannot mutate read only property '{prop_name}' for '{self.name}'.")
-        entity_property.stage_change(val)
+        entity_property.set(val)
         setattr(self._adapter, prop_name, val)
 
     def read(self, prop):
