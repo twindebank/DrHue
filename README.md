@@ -8,6 +8,17 @@ It is capable of managing rules for Philips Hue lights and sensors, and will be 
 
 See how to use this code in the [example](example) directory.
 
+Run on Pi using:
+```bash
+# start
+screen -dmS drhue python -m example.main
+
+# check running
+screen -list
+
+# open session (exit with ctrl+d)
+screen -d -r drhue
+```
 
 
 ---
