@@ -21,8 +21,8 @@ class Context:
     def __post_init__(self):
         self.times = TimeHelper(self.city, self.bedtime, self.wakeup, self.timezone)
 
-    def update_and_wait(self):
+    def update_and_wait(self, log=True):
         self.bridge.write_to_bridge()
         time.sleep(self.refresh_interval)
         self.times.update()
-        self.bridge.read_data_from_bridge()
+        self.bridge.read_data_from_bridge(log)

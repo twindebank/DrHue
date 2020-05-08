@@ -42,9 +42,8 @@ class DrHueBridge:
     def _get_username():
         return os.environ["HUE_USERNAME"].strip()
 
-    def read_data_from_bridge(self):
-        data = self.get()
-
+    def read_data_from_bridge(self, log=True):
+        data = self.get(log=log)
         self.data = data
 
     def stage_change(self, entity_path, payload, update=True):
@@ -78,9 +77,10 @@ class DrHueBridge:
         r.raise_for_status()
         return r.json()
 
-    def get(self, relative_path=''):
+    def get(self, relative_path='', log=True):
         path_str = f' ({relative_path})' if relative_path else ''
-        logger.debug(f"Reading from bridge{path_str}...")
+        if log:
+            logger.debug(f"Reading from bridge{path_str}...")
         data = self._get(relative_path)
         if isinstance(data, list):
             for val in data:
