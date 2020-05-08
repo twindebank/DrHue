@@ -14,7 +14,7 @@ class Awake(Rule):
 
     def apply(self):
         if sensor.read('motion') and sensor.read('dark'):
-            lights.turn_on(scene='Read', timeout_mins=3)
+            lights.turn_on(scene='Relax', timeout_mins=3)
 
 
 class NotAwakeMorning(Rule):

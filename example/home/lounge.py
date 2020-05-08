@@ -42,7 +42,7 @@ class Night(Rule):
 
     def apply(self):
         if sensor.read('motion'):
-            lights.turn_on(scene='Read', timeout_mins=30)
+            lights.turn_on(scene='Relax', timeout_mins=60)
 
 
 class LateNight(EarlyMorning):
