@@ -1,7 +1,7 @@
 import git
 from loguru import logger
 
-repo = git.Repo('..')
+repo = git.Repo('.')
 
 
 def update_code():
