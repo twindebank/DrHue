@@ -1,6 +1,7 @@
 import datetime
 import time
 from dataclasses import dataclass
+from typing import Optional
 
 import pytz
 from astral import LocationInfo
@@ -17,6 +18,8 @@ class Context:
     city: LocationInfo = LocationInfo("London", "England", "Europe/London", 51.5, -0.116)
     bedtime: datetime.time = datetime.time(hour=23, minute=45)
     wakeup: datetime.time = datetime.time(hour=8, minute=0)
+    webserver: bool = False
+    update_code_every_n_loops: Optional[int] = None
 
     def __post_init__(self):
         self.times = TimeHelper(self.city, self.bedtime, self.wakeup, self.timezone)

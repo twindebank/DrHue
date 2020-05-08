@@ -15,7 +15,9 @@ def run_main_loop():
     context = Context(
         bridge=DrHueBridge(),
         bedtime=datetime.time(hour=23, minute=45),
-        refresh_interval=1
+        refresh_interval=1,
+        webserver=True,
+        update_code_every_n_loops=60
     )
 
     home = Home(
@@ -30,7 +32,7 @@ def run_main_loop():
         ]
     )
     home.attach_context(context)
-    home.run(webserver=True)
+    home.run()
 
 
 if __name__ == '__main__':
