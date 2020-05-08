@@ -30,7 +30,7 @@ def run_main_loop():
         ]
     )
     home.attach_context(context)
-    home.run()
+    home.run(webserver=True)
 
 
 if __name__ == '__main__':
