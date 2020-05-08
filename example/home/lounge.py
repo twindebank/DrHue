@@ -13,9 +13,14 @@ class EarlyMorning(Rule):
     start = times.day_start
     end = times.wakeup
 
+    # def apply(self):
+    #     if sensor.read('motion') and sensor.read('dark'):
+    #         lights.turn_on(scene='Dimmed', timeout_mins=5)
+
     def apply(self):
-        if sensor.read('motion') and sensor.read('dark'):
-            lights.turn_on(scene='Dimmed', timeout_mins=5)
+        if sensor.read('motion'):
+            lights.turn_on(scene='Relax', timeout_mins=20)
+
 
 
 class Daytime(Rule):
