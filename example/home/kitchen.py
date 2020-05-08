@@ -13,7 +13,12 @@ class Awake(Rule):
     end = times.bedtime
 
     def apply(self):
+        print('motion')
+        print(sensor.read('motion'))
+        print('dark')
+        print(sensor.read('dark'))
         if sensor.read('motion') and sensor.read('dark'):
+            print('herer')
             lights.turn_on(scene='Bright', timeout_mins=5)
 
 
@@ -38,8 +43,8 @@ class KitchenRules(Rules):
 kitchen = Room(
     name="kitchen",
     devices=[
-        Lights(name="Kitchen"),
-        Sensor(name="Kitchen sensor")
+        lights,
+        sensor
     ],
     rules=[KitchenRules]
 )
