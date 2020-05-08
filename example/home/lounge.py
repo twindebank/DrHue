@@ -46,6 +46,7 @@ class Night(Rule):
     end = times.bedtime
 
     def apply(self):
+        print('hi')
         if sensor.read('motion'):
             lights.turn_on(scene='Relax', timeout_mins=60)
 
