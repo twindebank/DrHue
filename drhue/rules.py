@@ -15,7 +15,7 @@ DISABLE = 'disable'
 class Rule(ABC):
     def __init__(self, entity):
         self.entity = entity
-        self.fqn = get_obj_fqn(self)
+        self.fqn = '.'.join(get_obj_fqn(self).split('.')[-2:])
 
     @property
     @abstractmethod
@@ -57,17 +57,17 @@ class Rules(ABC):
                 logger.warning(f"Rules for {self} should end on day end.")
 
             for rule in self.rules_sorted:
-                self.state.setdefault(f"{rule.fqn}_state", AUTO)
+                self.state.setdefault(f"{rule.fqn}.state", AUTO)
 
     def apply(self):
         for rule in self.rules_sorted:
-            rule_state = self.state[f"{rule.fqn}_state"]
-            self.state[f"{rule.fqn}_active"] = \
+            rule_state = self.state[f"{rule.fqn}.state"]
+            self.state[f"{rule.fqn}.active"] = \
                 self.context.times[rule.start] < self.times.now <= self.context.times[rule.end]
 
             if rule_state == DISABLE:
                 continue
 
-            if rule_state == AUTO and self.state[f"{rule.fqn}_active"] or rule_state == ENABLE:
+            if rule_state == AUTO and self.state[f"{rule.fqn}.active"] or rule_state == ENABLE:
                 logger.debug(f"Rule {rule.fqn} is active.")
                 rule.apply()

@@ -5,12 +5,11 @@ from path import Path
 from drhue.state import State
 
 PAGE = """
-<h1>States</h1>
+<div style="width=50%;float:left;overflow:scroll;height:100%">
 {}
+</div>
 
-<br>
-<h1>Log</h1>
-<div style="width:100%;height:400px;font-family:monospace;overflow:scroll;padding:10px;background:lightgrey">
+<div style="width:50%;float:right;height:100%;font-family:monospace;overflow:scroll;padding:10px;background:lightgrey">
 {}
 </div>
 """

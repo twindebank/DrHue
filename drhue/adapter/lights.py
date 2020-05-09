@@ -46,7 +46,7 @@ class DrHueLights(DrHueAdapter):
 
     @property
     def on(self):
-        return self.bridge.data['groups'][self.group_key]['action']['on']
+        return self.store_state(self.bridge.data['groups'][self.group_key]['action']['on'])
 
     @on.setter
     def on(self, state):
@@ -55,7 +55,7 @@ class DrHueLights(DrHueAdapter):
 
     @property
     def brightness(self):
-        return self.bridge.data['groups'][self.group_key]['action']['bri']
+        return self.store_state(self.bridge.data['groups'][self.group_key]['action']['bri'])
 
     @brightness.setter
     def brightness(self, brightness):
@@ -97,8 +97,8 @@ class DrHueLights(DrHueAdapter):
                 if match:
                     break
             if match:
-                return scene['name']
-        return None
+                return self.store_state(scene['name'])
+        return self.store_state(None)
 
     @scene.setter
     def scene(self, scene_name):

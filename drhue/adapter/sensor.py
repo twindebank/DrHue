@@ -38,20 +38,20 @@ class DrHueSensor(DrHueAdapter):
 
     @property
     def motion(self):
-        return self.bridge.data['sensors'][self.motion_sensor_key]['state']['presence']
+        return self.store_state(self.bridge.data['sensors'][self.motion_sensor_key]['state']['presence'])
 
     @property
     def temperature(self):
-        return self.bridge.data['sensors'][self.temp_sensor_key]['state']['temperature']
+        return self.store_state(self.bridge.data['sensors'][self.temp_sensor_key]['state']['temperature'] / 100)
 
     @property
     def daylight(self):
-        return self.bridge.data['sensors'][self.light_sensor_key]['state']['daylight']
+        return self.store_state(self.bridge.data['sensors'][self.light_sensor_key]['state']['daylight'])
 
     @property
     def lightlevel(self):
-        return self.bridge.data['sensors'][self.light_sensor_key]['state']['lightlevel']
+        return self.store_state(self.bridge.data['sensors'][self.light_sensor_key]['state']['lightlevel'])
 
     @property
     def dark(self):
-        return self.bridge.data['sensors'][self.light_sensor_key]['state']['dark']
+        return self.store_state(self.bridge.data['sensors'][self.light_sensor_key]['state']['dark'])

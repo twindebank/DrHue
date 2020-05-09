@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from collections.abc import MutableMapping
 
@@ -27,8 +29,8 @@ class State(MutableMapping):
         return self.store[key]
 
     def __setitem__(self, key, value):
-        if not isinstance(value, (bool, str, tuple)):
-            raise ValueError("Must be immutable value.")
+        if not isinstance(value, (bool, str, int, float)):
+            raise ValueError("Must be simple immutable value.")
         self.store[key] = value
         self.write_file()
 
@@ -40,6 +42,12 @@ class State(MutableMapping):
 
     def __len__(self):
         return len(self.store)
+
+    def setdefault(self, k: _KT, default: _VT = ...) -> _VT:
+        try:
+            self[k]
+        except KeyError:
+            self[k] = default
 
 
 def get_obj_fqn(obj):
