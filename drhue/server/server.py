@@ -1,6 +1,31 @@
-from flask import Flask, Response
+from flask import Flask
 from loguru import logger
 from path import Path
+
+from drhue.state import State
+
+PAGE = """
+<h1>States</h1>
+{}
+
+<br>
+<h1>Log</h1>
+<div style="width:100%;height:400px;font-family:monospace;overflow:scroll;padding:10px;background:lightgrey">
+{}
+</div>
+"""
+
+
+def get_formatted_log():
+    log = Path('log.log').read_text()
+    recent_first = '\n<br>'.join(reversed(log.split('\n')))
+    return recent_first
+
+
+def get_formatted_state():
+    s = State()
+    strs = [f"<b>{k}</b>: {v}" for k, v in s.items()]
+    return '\n<br>'.join(strs)
 
 
 def start_server():
@@ -9,8 +34,6 @@ def start_server():
 
     @app.route('/')
     def main():
-        log = Path('log.log').read_text()
-        recent_first = '\n'.join(reversed(log.split('\n')))
-        return Response(recent_first, mimetype='text/plain')
+        return PAGE.format(get_formatted_state(), get_formatted_log())
 
     app.run(port=8080, host='0.0.0.0')
