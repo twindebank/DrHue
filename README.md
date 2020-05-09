@@ -11,13 +11,13 @@ See how to use this code in the [example](example) directory.
 Run on Pi using:
 ```bash
 # start
-screen -dmS drhue python -m example.main
+make run
 
 # check running
-screen -list
+make list
 
-# open session (exit with ctrl+d)
-screen -d -r drhue
+# attach to running session (exit with ctrl+a then ctrl+d)
+make attach
 ```
 
 
