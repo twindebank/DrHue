@@ -25,6 +25,7 @@ screen -d -r drhue
 
 ### ToDo
 
+1. Fix hotloading code.
 1. Figure out better deployment pipeline to Pi, maybe git pull every 20 loops and hot reload code?
 1. Add history to entities.
 1. Finish test suite.

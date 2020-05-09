@@ -32,7 +32,7 @@ def run_main_loop():
         ]
     )
     home.attach_context(context)
-    home.run()
+    home.start()
 
 
 if __name__ == '__main__':
