@@ -1,10 +1,9 @@
 loguru~=0.4.1
 requests~=2.23.0
 deepmerge~=0.1.0
-pytz~=2019.3
+pytz~=2020.1
 astral~=2.1
-pytest~=5.4.1
+pytest~=5.4.2
 reprint~=0.5.2
 Flask~=1.1.2
-reloading~=1.0.0
 path~=13.2.0

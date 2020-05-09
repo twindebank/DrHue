@@ -16,8 +16,7 @@ def run_main_loop():
         bridge=DrHueBridge(),
         bedtime=datetime.time(hour=23, minute=45),
         refresh_interval=1,
-        webserver=True,
-        update_code_every_n_loops=60
+        webserver=True
     )
 
     home = Home(
