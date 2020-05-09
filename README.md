@@ -11,13 +11,13 @@ See how to use this code in the [example](example) directory.
 Run on Pi using:
 ```bash
 # start
-screen -dmS drhue python -m example.main
+make run
 
 # check running
-screen -list
+make list
 
-# open session (exit with ctrl+d)
-screen -d -r drhue
+# attach to running session (exit with ctrl+a then ctrl+d)
+make attach
 ```
 
 
@@ -25,6 +25,7 @@ screen -d -r drhue
 
 ### ToDo
 
+1. Fix hotloading code.
 1. Figure out better deployment pipeline to Pi, maybe git pull every 20 loops and hot reload code?
 1. Add history to entities.
 1. Finish test suite.

@@ -1,19 +1,16 @@
 from __future__ import annotations
 
-import itertools
 from abc import ABCMeta, ABC
 from dataclasses import dataclass, field
 from multiprocessing import Process
 from typing import Type, List, Any, Optional, Dict
 
 from loguru import logger
-from reloading import reloading
 
 from drhue.adapter.base import DrHueAdapter
 from drhue.context import Context
 from drhue.rules import Rules
-from drhue.server import start_server
-from drhue.updater import update_code
+from drhue.server.server import start_server
 
 
 @dataclass
@@ -64,20 +61,20 @@ class Entity(ABC):
             self._sorted_rules = sorted(self.gather_rules(), key=lambda rule: rule.priority)
         return self._sorted_rules
 
-    def run(self):
-        if self.context.webserver:
-            Process(target=start_server).start()
-
-        counter = 0
-        for _ in reloading(itertools.repeat([])):
+    def run_loop(self):
+        while True:
             self.sync_states()
             self.run_rules()
             self.context.update_and_wait()
-            if self.context.update_code_every_n_loops:
-                counter += 1
-                if counter == self.context.update_code_every_n_loops:
-                    update_code()
-                    counter = 0
+
+    def start(self):
+        logger.add("log.log", rotation="1Mb")
+        if self.context.webserver:
+            p = Process(target=self.run_loop)
+            p.start()
+            start_server()
+        else:
+            self.run_loop()
 
     def run_rules(self):
         for rule in self.sorted_rules:

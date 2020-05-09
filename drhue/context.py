@@ -19,7 +19,6 @@ class Context:
     bedtime: datetime.time = datetime.time(hour=23, minute=45)
     wakeup: datetime.time = datetime.time(hour=8, minute=0)
     webserver: bool = False
-    update_code_every_n_loops: Optional[int] = None
 
     def __post_init__(self):
         self.times = TimeHelper(self.city, self.bedtime, self.wakeup, self.timezone)

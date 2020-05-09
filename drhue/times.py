@@ -51,6 +51,9 @@ class TimeHelper:
     def get(self, time: Time):
         return getattr(self, time.name) + time.offset
 
+    def __getitem__(self, item):
+        return self.get(item)
+
     @property
     def dawn(self):
         return self.sun['dawn']
