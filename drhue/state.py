@@ -4,6 +4,7 @@ import time
 from collections.abc import MutableMapping
 from json import JSONDecodeError
 
+import inflection
 import pickledb as pickledb
 from path import Path
 
@@ -28,8 +29,11 @@ class State(MutableMapping):
             Path(DB_FILE).remove()
             self.db = _get_db()
 
+    def __keytransform__(self, key):
+        return inflection.underscore(key)
+
     def __getitem__(self, key):
-        val = self.db.get(key)
+        val = self.db.get(self.__keytransform__(key))
         if val is False:
             raise KeyError(key)
         if val is FALSE:
@@ -55,10 +59,10 @@ class State(MutableMapping):
             raise TypeError("Can't set value for read only database.")
         if value is False:
             value = FALSE
-        self.db.set(key, value)
+        self.db.set(self.__keytransform__(key), value)
 
     def __delitem__(self, key):
-        self.db.rem(key)
+        self.db.rem(self.__keytransform__(key))
 
     def __iter__(self):
         for key in self.db.getall():

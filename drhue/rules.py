@@ -15,7 +15,8 @@ DISABLE = 'disable'
 class Rule(ABC):
     def __init__(self, entity):
         self.entity = entity
-        self.fqn = '.'.join(get_obj_fqn(self).split('.')[-2:])
+        fqn_partial = get_obj_fqn(self).split('.')[-2:]
+        self.fqn = fqn_partial[0] + '.rules.' + fqn_partial[1]
 
     @property
     @abstractmethod

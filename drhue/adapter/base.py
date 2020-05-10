@@ -18,6 +18,7 @@ class DrHueAdapter(ABC):
 
     def __post_init__(self):
         self.state = State()
+        self.uid = self.name.lower().replace(' ', '.')
 
     def stage_changes(self, payload, update=True):
         self.bridge.stage_change(self.entity_action_path, payload, update)
@@ -29,5 +30,5 @@ class DrHueAdapter(ABC):
 
     def store_state(self, val):
         caller_name = inspect.stack()[1].function
-        self.state[f"{self.name} ({caller_name})"] = val
+        self.state[f"{self.uid}.{caller_name}"] = val
         return val

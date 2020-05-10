@@ -2,15 +2,15 @@ from path import Path
 
 
 def get_formatted_log():
-    log = Path('log.log').read_text()
-    recent_first = '\n<br>'.join(reversed(log.split('\n')))
+    log = Path('log.log').read_text().strip(' \n').split('\n')
+    recent_first = '\n<br>'.join(reversed(log))
     return recent_first
 
 
 def get_formatted_state(state):
     state.reload()
     nested = create_nested_dict_from_period_separated_keys(state)
-    return nested_dict_to_html(nested)
+    return nested_dict_to_html(nested)[5:]
 
 
 def nested_dict_to_html(d, depth=0):

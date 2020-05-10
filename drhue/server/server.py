@@ -6,11 +6,15 @@ from drhue.state import State
 
 PAGE = """
 <div style="width=35%;float:left;overflow:scroll;height:100%">
+
 {}
+
 </div>
 
 <div style="width:65%;float:right;height:100%;font-family:monospace;overflow-x:scroll;overflow-y:scroll;padding:10px;background:lightgrey">
+
 {}
+
 </div>
 """
 

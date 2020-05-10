@@ -20,3 +20,6 @@ venv:
 
 rm-venv:
 	pyenv uninstall drhue
+
+cleandb:
+	rm state.json
