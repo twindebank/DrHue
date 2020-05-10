@@ -5,25 +5,28 @@ from collections.abc import MutableMapping
 from json import JSONDecodeError
 
 import pickledb as pickledb
-from loguru import logger
+from path import Path
 
-db = None
+DB = None
+DB_FILE = 'state.json'
+FALSE = 'false'
 
 
 def _get_db():
-    global db
-    if db is None:
-        db = pickledb.load('state.json', auto_dump=True)
-    return db
-
-
-FALSE = 'false'
+    global DB
+    if DB is None:
+        DB = pickledb.load(DB_FILE, auto_dump=True)
+    return DB
 
 
 class State(MutableMapping):
     def __init__(self, read_only=False):
         self.read_only = read_only
-        self.db = _get_db()
+        try:
+            self.db = _get_db()
+        except JSONDecodeError:
+            Path(DB_FILE).remove()
+            self.db = _get_db()
 
     def __getitem__(self, key):
         val = self.db.get(key)
@@ -43,7 +46,6 @@ class State(MutableMapping):
                 self.db._loaddb()
             except JSONDecodeError:
                 wait = t / 10
-                logger.debug(f"Failed to reload dbt, waiting {wait:.2f}s and trying again.")
                 time.sleep(wait)
                 if i == len(tries) - 1:
                     raise RuntimeError("DB could not be reloaded.")
