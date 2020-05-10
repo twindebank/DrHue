@@ -15,7 +15,6 @@ class DrHueAdapter(ABC):
     """
     bridge: DrHueBridge
     name: str
-    state: State = State()
 
     def __post_init__(self):
         self.state = State()

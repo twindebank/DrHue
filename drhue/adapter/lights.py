@@ -13,6 +13,7 @@ class DrHueLights(DrHueAdapter):
     The logic for scenes is a bit convoluted, could be probably be simplified.
     """
     def __post_init__(self):
+        super().__post_init__()
         self.group_key = self._get_group_key()
 
     @property

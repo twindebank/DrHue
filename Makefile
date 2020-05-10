@@ -1,4 +1,4 @@
-run-direct:
+run-foreground:
 	python -m example.main
 
 run:
@@ -12,3 +12,11 @@ list:
 
 kill:
 	killall screen
+
+venv:
+	pyenv virtualenv 3.7.7 drhue
+	pyenv local drhue
+	pip install -r requirements.txt
+
+rm-venv:
+	pyenv uninstall drhue

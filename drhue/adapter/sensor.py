@@ -6,6 +6,7 @@ from drhue.adapter.base import DrHueAdapter
 @dataclass
 class DrHueSensor(DrHueAdapter):
     def __post_init__(self):
+        super().__post_init__()
         self.motion_sensor_key, self.temp_sensor_key, self.light_sensor_key = self._get_sensor_keys()
 
     def _get_sensor_keys(self):

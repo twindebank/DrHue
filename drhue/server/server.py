@@ -14,6 +14,8 @@ PAGE = """
 </div>
 """
 
+s = State(read_only=True)
+
 
 def get_formatted_log():
     log = Path('log.log').read_text()
@@ -22,7 +24,7 @@ def get_formatted_log():
 
 
 def get_formatted_state():
-    s = State()
+    s.reload()
     strs = [f"<b>{k}</b>: {v}" for k, v in s.items()]
     return '\n<br>'.join(strs)
 
