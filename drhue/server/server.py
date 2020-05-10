@@ -1,7 +1,7 @@
 from flask import Flask
 from loguru import logger
-from path import Path
 
+from drhue.server.formatting import get_formatted_log, get_formatted_state
 from drhue.state import State
 
 PAGE = """
@@ -17,24 +17,14 @@ PAGE = """
 s = State(read_only=True)
 
 
-def get_formatted_log():
-    log = Path('log.log').read_text()
-    recent_first = '\n<br>'.join(reversed(log.split('\n')))
-    return recent_first
-
-
-def get_formatted_state():
-    s.reload()
-    strs = [f"<b>{k}</b>: {v}" for k, v in s.items()]
-    return '\n<br>'.join(strs)
-
-
 def start_server():
     logger.info("Starting webserver...")
     app = Flask(__name__)
 
     @app.route('/')
     def main():
-        return PAGE.format(get_formatted_state(), get_formatted_log())
+        log_html = get_formatted_log()
+        state_html = get_formatted_state(s)
+        return PAGE.format(state_html, log_html)
 
-    app.run(port=8080, host='0.0.0.0')
+    app.run(port=8080, host='0.0.0.0', threaded=True)
