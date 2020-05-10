@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import time
 from collections.abc import MutableMapping
+from json import JSONDecodeError
 
 import pickledb as pickledb
+from loguru import logger
 
 db = None
 
@@ -31,7 +34,19 @@ class State(MutableMapping):
         return val
 
     def reload(self):
-        self.db._loaddb()
+        """
+        Reload the db from the file, try again if it fails (the file is probably being rewritten).
+        """
+        tries = [5, 5, 5, 5, 5]
+        for i, t in enumerate(tries):
+            try:
+                self.db._loaddb()
+            except JSONDecodeError:
+                wait = t / 10
+                logger.debug(f"Failed to reload dbt, waiting {wait:.2f}s and trying again.")
+                time.sleep(wait)
+                if i == len(tries) - 1:
+                    raise RuntimeError("DB could not be reloaded.")
 
     def __setitem__(self, key, value):
         if self.read_only:
