@@ -16,6 +16,7 @@ FALSE = 'false'
 def _get_db():
     global DB
     if DB is None:
+        print("Fetching DB...")
         DB = pickledb.load(DB_FILE, auto_dump=True)
     return DB
 
@@ -29,7 +30,8 @@ class State(MutableMapping):
             Path(DB_FILE).remove()
             self.db = _get_db()
 
-    def __keytransform__(self, key):
+    @staticmethod
+    def __keytransform__(key):
         return inflection.underscore(key)
 
     def __getitem__(self, key):

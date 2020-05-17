@@ -27,10 +27,11 @@ class Lights(HueEntity):
             create array of current birghtness to zero with length 30min*60*refreshrate
 
         """
-        if self._active_timeout is not None and self.context.times.now > self._active_timeout:
+        timeout = self.get_active_timeout()
+        if timeout is not None and self.context.times.now > timeout:
             logger.info(f"'{self.name}' timed out, switching off.")
             self.set('on', False)
-            self._active_timeout = None
+            self.clear_timeout()
 
     def turn_on(self, timeout_mins=None, brightness=None, scene=None):
         self.set('on', True)
@@ -47,4 +48,16 @@ class Lights(HueEntity):
         self.set('brightness', 1)
 
     def set_timeout(self, timeout_mins):
-        self._active_timeout = self.context.times.now + timedelta(minutes=timeout_mins)
+        uid = self._adapter.uid
+        timeout_dt = self.context.times.now + timedelta(minutes=timeout_mins)
+        self.state[f"{uid}.active_timeout"] = str(timeout_dt)
+
+    def clear_timeout(self):
+        uid = self._adapter.uid
+        self.state[f"{uid}.active_timeout"] = None
+
+    def get_active_timeout(self):
+        uid = self._adapter.uid
+        timeout_dt_str = self.state.get(f"{uid}.active_timeout", None)
+        if timeout_dt_str:
+            return datetime.fromisoformat(timeout_dt_str)

@@ -116,6 +116,7 @@ class HueEntity(Entity, metaclass=ABCMeta):
     def _attach_context(self, context: Context):
         """Need to initialise the adapter after attaching context."""
         self._adapter = self._adapter_class(bridge=self.context.bridge, name=self.name)
+        self.state = self._adapter.state
 
     def _sync_states(self):
         """Ensure entity is in sync with device adapter after reading data from bridge."""

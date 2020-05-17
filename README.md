@@ -25,7 +25,12 @@ make attach
 
 ### ToDo
 
+
+
+
+
 1. Improve rules and make more tolerant to external changes.
+1. Allow setting of sensitivity (motion/brightness)
 1. Think about control from webui, maybe rethink how state is stored and communicated between processed (add a [queue](https://stackoverflow.com/questions/24500768/parallel-processing-threading-in-python/24501437#24501437)?)
 1. Finish test suite.
 1. Add history to entities and helper functions to access history.

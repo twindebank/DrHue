@@ -15,7 +15,7 @@ class EarlyMorning(Rule):
 
     def apply(self):
         # todo make this rule more tolerant to manual override
-        if sensor.read('motion') and sensor.read('dark'):
+        if sensor.read('motion') and not sensor.read('daylight'):
             lights.turn_on(scene='Dimmed', timeout_mins=5)
 
 
@@ -24,7 +24,7 @@ class Daytime(Rule):
     end = times.sunset.add_offset(hours=-1)
 
     def apply(self):
-        if sensor.read('motion') and sensor.read('dark'):
+        if sensor.read('motion') and not sensor.read('daylight'):
             lights.turn_on(scene='Read', timeout_mins=15)
 
 
