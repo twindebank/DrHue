@@ -70,5 +70,4 @@ class Rules(ABC):
                 continue
 
             if rule_state == AUTO and self.state[f"{rule.fqn}.active"] or rule_state == ENABLE:
-                logger.debug(f"Rule {rule.fqn} is active.")
                 rule.apply()

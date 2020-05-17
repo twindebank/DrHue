@@ -61,6 +61,7 @@ class Entity(ABC):
             self._sorted_rules = sorted(self.gather_rules(), key=lambda rule: rule.priority)
         return self._sorted_rules
 
+    @logger.catch
     def run_loop(self):
         while True:
             self.sync_states()
