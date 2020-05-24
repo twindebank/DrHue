@@ -5,11 +5,10 @@ venv:
 install-deps:
 	pip install --upgrade pip
 	pip install -r requirements.txt
-	pip install
-	pip install
 
 generate-creds:
-	openssl req -x509 -newkey rsa:2048 -keyout cloud_iot_private.pem -nodes -out cloud_iot.pub
+	mkdir -p creds
+	openssl req -x509 -newkey rsa:2048 -keyout creds/cloud_iot_private.pem -nodes -out creds/cloud_iot.pub
 
 fetch-google-creds:
-	wget https://pki.google.com/roots.pem
+	wget https://pki.google.com/roots.pem creds/roots.pem
