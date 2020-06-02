@@ -1,3 +1,5 @@
 paho-mqtt
 pyjwt
 cryptography
+path~=14.0.1
+
