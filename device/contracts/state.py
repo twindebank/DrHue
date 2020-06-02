@@ -14,7 +14,6 @@ class HueGroup:
     name: str
     id: str
     lights: LightsState
-    sensors: SensorState
 
     @classmethod
     def from_raw(cls, group_name: str, group_id: str, raw_data: RawHueBridgeData):
@@ -22,13 +21,13 @@ class HueGroup:
             name=group_name,
             id=group_id,
             lights=LightsState.from_raw(group_id, raw_data),
-            sensors=SensorState.from_raw(group_id, raw_data),
         )
 
 
 @dataclass()
 class HueBridgeState:
     groups: Dict[str, HueGroup] = field(default_factory=list)
+    sensors: Dict[str, SensorState] = field(default_factory=list)
 
     @classmethod
     def from_raw(cls, raw_data: RawHueBridgeData):
@@ -37,7 +36,11 @@ class HueBridgeState:
             raw_data.bridge['groups'].items()
         }
 
-        return cls(groups=groups)
+
+        return cls(
+            groups=groups,
+            sensors=SensorState.from_raw(raw_data),
+        )
 
 
 @dataclass
