@@ -1,7 +1,7 @@
 from dataclasses import asdict
 
 from device.contracts.lights import LightsState
-from device.contracts.state import State
+from device.contracts.fields import State
 
 
 def test_contracts_state_state(raw_hub_data):

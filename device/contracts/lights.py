@@ -1,22 +1,22 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 
-from device.contracts.raw import RawHueBridgeData
+from device.contracts.fields import state_field
 
 
 @dataclass
-class LightState:
+class Light:
     name: str
     id: str
     on: bool
-    brightness: int
-    hue: Optional[int]
-    saturation: Optional[int]
-    effect: Optional[str]
-    xy: Optional[List[int]]
-    colour_temp: Optional[int]
-    colour_mode: Optional[str]
-    reachable: Optional[bool]
+    brightness: int = state_field()
+    hue: Optional[int] = state_field()
+    saturation: Optional[int] = state_field()
+    effect: Optional[str] = state_field()
+    xy: Optional[List[int]] = state_field()
+    colour_temp: Optional[int] = state_field()
+    colour_mode: Optional[str] = state_field()
+    reachable: Optional[bool] = state_field()
 
     @classmethod
     def from_raw(cls, light_name: str, light_id: str, light_state_data: dict):
@@ -52,28 +52,32 @@ class LightState:
 
 
 @dataclass
-class LightsState:
-    all_on: bool
-    any_on: bool
-    scene: Optional[str]
-    lights: Dict[str, LightState]
+class LightGroup:
+    name: str
+    id: str
+    lights: Dict[str, Light]
+    all_on: bool = state_field()
+    any_on: bool = state_field()
+    scene: Optional[str] = state_field()
 
     @classmethod
-    def from_raw(cls, group_id: str, raw_data: RawHueBridgeData):
+    def from_raw(cls, group_name: str, group_id: str, bridge_data: dict):
         lights = {
-            light_data['name']: LightState.from_raw(light_data['name'], light_id, light_data['state'])
-            for light_id, light_data in raw_data.bridge['lights'].items()
-            if light_id in raw_data.bridge['groups'][group_id]['lights']
+            light_data['name']: Light.from_raw(light_data['name'], light_id, light_data['state'])
+            for light_id, light_data in bridge_data['lights'].items()
+            if light_id in bridge_data['groups'][group_id]['lights']
         }
         return cls(
-            all_on=raw_data.bridge['groups'][group_id]['state']['all_on'],
-            any_on=raw_data.bridge['groups'][group_id]['state']['any_on'],
-            scene=get_active_scene_from_raw(group_id, lights, raw_data.scenes),
+            name=group_name,
+            id=group_id,
+            all_on=bridge_data['groups'][group_id]['state']['all_on'],
+            any_on=bridge_data['groups'][group_id]['state']['any_on'],
+            scene=get_active_scene_from_raw(group_id, lights, bridge_data['scenes']),
             lights=lights
         )
 
 
-def get_active_scene_from_raw(group_id: str, lights: Dict[str, LightState], raw_scene_data: Dict):
+def get_active_scene_from_raw(group_id: str, lights: Dict[str, Light], raw_scene_data: Dict):
     scenes_for_group = {
         scene_id: scene_data
         for scene_id, scene_data in raw_scene_data.items()
@@ -82,7 +86,8 @@ def get_active_scene_from_raw(group_id: str, lights: Dict[str, LightState], raw_
     for scene_id, scene_data in scenes_for_group.items():
         match = False
         for light_name, light_state in lights.items():
-            scene_light_state = LightState.from_raw(light_state.name, light_state.id, scene_data['lightstates'][light_state.id])
+            scene_light_state = Light.from_raw(light_state.name, light_state.id,
+                                               scene_data['lightstates'][light_state.id])
             scene_light_state.on = light_state.on
             if not scene_light_state == light_state:
                 match = False

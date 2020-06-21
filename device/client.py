@@ -1,10 +1,12 @@
 import datetime
 import logging
 import ssl
+from collections import Callable
 from dataclasses import dataclass
 
 import jwt
 import paho.mqtt.client as mqtt
+from loguru import logger
 
 logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.CRITICAL)
 
@@ -87,11 +89,11 @@ class Client:
     mqtt_bridge_port: int = 8883
     jwt_exp_mins: datetime.timedelta = datetime.timedelta(minutes=60)
 
-    on_connect_callback = on_connect
-    on_publish_callback = on_publish
-    on_disconnect_callback = on_disconnect
-    on_message_callback = on_message
-    on_subscribe_callback = on_subscribe
+    on_connect_callback: Callable = on_connect
+    on_publish_callback: Callable = on_publish
+    on_disconnect_callback: Callable = on_disconnect
+    on_message_callback: Callable = on_message
+    on_subscribe_callback: Callable = on_subscribe
 
     def __post_init__(self):
         self.client_id = f'projects/{self.project_id}/' \
@@ -113,7 +115,6 @@ class Client:
 
         self.client.connect(self.mqtt_bridge_hostname, self.mqtt_bridge_port)
 
-        # Subscribe to the config topic.
         self.client.subscribe(self.config_topic, qos=1)
         self.client.subscribe(self.commands_topic, qos=0)
 
@@ -131,24 +132,26 @@ class Client:
         self.client.tls_set(ca_certs=self.ca_certs, tls_version=ssl.PROTOCOL_TLSv1_2)
 
     def _set_client_callbacks(self):
-        self.client.on_connect = on_connect
-        self.client.on_publish = on_publish
-        self.client.on_disconnect = on_disconnect
-        self.client.on_message = on_message
-        self.client.on_subscribe = on_subscribe
+        self.client.on_connect = self.on_connect_callback
+        self.client.on_publish = self.on_publish_callback
+        self.client.on_disconnect = self.on_disconnect_callback
+        self.client.on_message = self.on_message_callback
+        self.client.on_subscribe = self.on_subscribe_callback
 
     def send_state(self, state):
-        """Update state less frequently, around every 10s."""
+        """Update state less frequently, only on change."""
+        logger.info("Sending state...")
         self.client.publish(self.state_topic, state, qos=1)
 
     def send_telemetry_event(self, payload):
+        logger.info("Sending telemetry event...")
         self.client.publish(self.telemetry_topic, payload, qos=1)
 
     def add_message_callback(self, topic, callback):
         self.client.message_callback_add(topic, callback)
 
     def refresh_token(self):
-        print("Refreshing token...")
+        logger.info("Refreshing token...")
         self.client.disconnect()
         self.__post_init__()
 

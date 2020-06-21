@@ -1,40 +1,51 @@
-# one loop:
-# - publishing hub telemetry every second
-# - state every 10s
-# - subscribe to config topic
+import json
+import time
+
+from loguru import logger
 
 from device.bridge import DrHueBridge
 from device.client import Client
-from device.contracts.raw import RawData
-from device.contracts.state import State
+from device.parser import Parser
+
+"""
+todo:
+- state and telemetery working
+- need distinction between state and telemetry in data model
+"""
 
 
 def main():
+    bridge = DrHueBridge()
+    parser = Parser()
+
+    def message_callback(*_, message):
+        """todo"""
+        return
+        api_calls = parser.parse_config_message(message)
+        for url, payload in api_calls.items():
+            bridge.call(url, payload)
+
     client = Client(
         device_id='rpi',
         registry_id='home',
         project_id='theo-home',
+        on_message_callback=message_callback
     )
 
-    # here load up bridge
-
-    bridge = DrHueBridge()
-    bridge_data = bridge.get_raw_data()
-    raw = RawData(hue_bridge=bridge_data)
-    state = State.from_raw(raw_data=raw)
-    telemetry = Telemetry.from_raw(raw)
-
-    # i = 0
-    # while True:
-    #     client.loop()
-    #     time.sleep(1)
-    #     i += 1
-    #     # send telemetery every second for all sensors
-    #     # get commands for every second, use state to resolve stuff eg scene
-    #     if i % 10 == 0:
-    #         # send state every 10 seconds
-    #         client.send_state("i'm a state!!!")
-    #         client.send_telemetry_event("i'm a telemetery event!!!")
+    prev_state = None
+    prev_telemetry = None
+    while True:
+        parser.bridge_data = bridge.get_raw_data()
+        client.loop()
+        if prev_telemetry != parser.telemetry:
+            logger.info('Telemetry changed!')
+            client.send_telemetry_event(json.dumps(parser.telemetry))
+            prev_telemetry = parser.telemetry
+        if prev_state != parser.state:
+            logger.info('State changed!')
+            client.send_state(json.dumps(parser.state))
+            prev_state = parser.state
+        time.sleep(1)
 
 
 if __name__ == '__main__':
