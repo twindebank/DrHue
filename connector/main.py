@@ -43,11 +43,17 @@ def decode_event(event):
     return base64.b64decode(event['data']).decode('utf-8')
 
 
-def create_row(message, context):
-    message_type = json.loads(message).get("message_type", "unknown")
-    table_name = f"raw_{message_type}"
+def create_row(raw, context):
+    """
+    message type can be state or telemetry
+    namespace can be hue only atm
+    """
+    message = json.loads(raw)
+    message_type = message.get("type", "unknown")
+    message_source = message.get("source", "unknown")
+    table_name = f"raw_{message_type}_{message_source}"
     row = {
-        "payload": message,
+        "payload": raw,
         "event_id": context.event_id,
         "insertion_datetime": iso8601.parse_date(context.timestamp),
         "resource_name": context.resource['name']
@@ -57,14 +63,18 @@ def create_row(message, context):
 
 def send_to_bq(dataset, table, row):
     bigquery_client = bigquery.Client(project='theo-home')
+
     table_ref = TableReference(
         dataset_ref=DatasetReference(dataset_id=dataset, project='theo-home'),
         table_id=table,
     )
+
     schema = [SchemaField(name=field, field_type=bq_types[type(data)]) for field, data in row.items()]
 
-    table = Table(table_ref, schema=schema)
-    table = bigquery_client.create_table(table, exists_ok=True)
+    table = bigquery_client.create_table(
+        Table(table_ref, schema=schema),
+        exists_ok=True
+    )
 
     errors = bigquery_client.insert_rows(table, [row])
     if errors:

@@ -5,11 +5,17 @@ from contracts.fields import asdict, STATE, TELEMETRY
 from contracts.lights import LightGroup
 from contracts.sensor import Sensors
 
+"""
+todo make a base class from this to use for other data sources
+"""
+
 
 @dataclass
 class ParsedBridgeData:
     light_groups: Dict[str, LightGroup] = field(default_factory=list)
     sensors: Sensors = field(default_factory=list)
+
+    name: str = 'hue'
 
     @classmethod
     def from_raw(cls, bridge_data: dict):

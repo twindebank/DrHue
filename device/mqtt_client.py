@@ -154,27 +154,17 @@ class Client:
         self.client.on_message = self.on_message_callback
         self.client.on_subscribe = self.on_subscribe_callback
 
-    def _construct_message(self, message, message_type):
-        return json.dumps({
-            "message": message,
-            "message_type": message_type,
-            "created_datetime": datetime.datetime.now().isoformat()
-        })
+    def _construct_message(self, message):
+        return json.dumps(message)
 
     def send_state(self, message):
         logger.info("Sending state...")
-        payload = self._construct_message(
-            message=message,
-            message_type=MessageType.State
-        )
+        payload = self._construct_message(message=message)
         self.client.publish(self.state_topic, payload, qos=1)
 
     def send_telemetry_event(self, message):
         logger.info("Sending telemetry event...")
-        payload = self._construct_message(
-            message=message,
-            message_type=MessageType.Telemetry
-        )
+        payload = self._construct_message(message=message)
         self.client.publish(self.telemetry_topic, payload, qos=1)
 
     def add_message_callback(self, topic, callback):
