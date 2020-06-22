@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 from typing import Dict
 
-from device.contracts.fields import asdict, STATE, TELEMETRY
-from device.contracts.lights import LightGroup
-from device.contracts.sensor import Sensors
+from contracts.fields import asdict, STATE, TELEMETRY
+from contracts.lights import LightGroup
+from contracts.sensor import Sensors
 
 
 @dataclass
