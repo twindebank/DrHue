@@ -12,3 +12,24 @@ generate-creds:
 
 fetch-google-creds:
 	wget https://pki.google.com/roots.pem creds/roots.pem
+
+run-foreground:
+	python -m main
+
+run:
+	screen -dmS drhue python -m main
+
+attach:
+	screen -d -r drhue
+
+list:
+	screen -list
+
+kill:
+	killall screen
+
+rm-venv:
+	pyenv uninstall cloud-iot
+
+
+
