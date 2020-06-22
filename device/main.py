@@ -5,8 +5,7 @@ from client import Client
 from parser import Parser
 
 """
-todo:
-- need ability to change state
+todo: https://www.notion.so/IoT-RPi-Design-d9dde3651c4d4517bc793547fb895ede
 """
 
 
