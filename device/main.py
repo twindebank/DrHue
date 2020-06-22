@@ -1,5 +1,3 @@
-import json
-
 from loguru import logger
 
 from device.bridge import DrHueBridge
@@ -8,15 +6,12 @@ from device.parser import Parser
 
 """
 todo:
-- state and telemetery working
-- need distinction between state and telemetry in data model
-- are both being sent to same topic? should make different (and therefore different cloud funcs)
-    can oyu get multiple topics for cloud func?
 - need ability to change state
 """
 
 
 def main():
+    logger.add("log.log", rotation="1Mb")
     bridge = DrHueBridge()
     parser = Parser()
 
