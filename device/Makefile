@@ -14,10 +14,10 @@ fetch-google-creds:
 	wget https://pki.google.com/roots.pem creds/roots.pem
 
 run-foreground:
-	python -m main
+	cd ..; python -m device.main
 
 run:
-	screen -dmS drhue python -m main
+	cd ..; screen -dmS drhue python -m device.main
 
 attach:
 	screen -d -r drhue
