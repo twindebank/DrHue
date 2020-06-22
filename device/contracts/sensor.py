@@ -3,7 +3,7 @@ from typing import Dict
 
 from loguru import logger
 
-from device.contracts.fields import state_field, telemetry_field
+from contracts.fields import state_field, telemetry_field
 
 
 class SensorNotFound(Exception):
