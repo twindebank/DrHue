@@ -1,14 +1,30 @@
 import datetime
+import json
 import logging
 import ssl
 from collections import Callable
 from dataclasses import dataclass
+from enum import Enum
 
 import jwt
 import paho.mqtt.client as mqtt
 from loguru import logger
 
 logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.CRITICAL)
+
+
+class StrEnum(str, Enum):
+    def __str__(self) -> str:
+        return self.value
+
+    # https://docs.python.org/3.6/library/enum.html#using-automatic-values
+    def _generate_next_value_(name, start, count, last_values):
+        return name
+
+
+class MessageType(StrEnum):
+    State = 'state'
+    Telemetry = 'telemetry'
 
 
 def create_jwt(project_id, private_key_file, algorithm):
@@ -138,13 +154,27 @@ class Client:
         self.client.on_message = self.on_message_callback
         self.client.on_subscribe = self.on_subscribe_callback
 
-    def send_state(self, state):
-        """Update state less frequently, only on change."""
-        logger.info("Sending state...")
-        self.client.publish(self.state_topic, state, qos=1)
+    def _construct_message(self, message, message_type):
+        return json.dumps({
+            "message": message,
+            "message_type": message_type,
+            "created_datetime": datetime.datetime.now().isoformat()
+        })
 
-    def send_telemetry_event(self, payload):
+    def send_state(self, message):
+        logger.info("Sending state...")
+        payload = self._construct_message(
+            message=message,
+            message_type=MessageType.State
+        )
+        self.client.publish(self.state_topic, payload, qos=1)
+
+    def send_telemetry_event(self, message):
         logger.info("Sending telemetry event...")
+        payload = self._construct_message(
+            message=message,
+            message_type=MessageType.Telemetry
+        )
         self.client.publish(self.telemetry_topic, payload, qos=1)
 
     def add_message_callback(self, topic, callback):

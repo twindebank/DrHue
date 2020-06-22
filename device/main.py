@@ -1,5 +1,4 @@
 import json
-import time
 
 from loguru import logger
 
@@ -11,6 +10,9 @@ from device.parser import Parser
 todo:
 - state and telemetery working
 - need distinction between state and telemetry in data model
+- are both being sent to same topic? should make different (and therefore different cloud funcs)
+    can oyu get multiple topics for cloud func?
+- need ability to change state
 """
 
 
@@ -39,13 +41,13 @@ def main():
         client.loop()
         if prev_telemetry != parser.telemetry:
             logger.info('Telemetry changed!')
-            client.send_telemetry_event(json.dumps(parser.telemetry))
+            client.send_telemetry_event(parser.telemetry)
             prev_telemetry = parser.telemetry
         if prev_state != parser.state:
             logger.info('State changed!')
-            client.send_state(json.dumps(parser.state))
+            client.send_state(parser.state)
             prev_state = parser.state
-        time.sleep(1)
+        client.loop()
 
 
 if __name__ == '__main__':

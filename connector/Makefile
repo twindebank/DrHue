@@ -5,7 +5,7 @@ venv:
 deploy:
 	gcloud functions deploy pubsub_to_bq \
 	   --runtime "python37" \
-	   --entry-point=pubsub_to_bq \
+	   --entry-point=main \
 	   --trigger-topic rpi \
 	   --region europe-west1 \
-	   --set-env-vars dataset=home,table=rpi
+

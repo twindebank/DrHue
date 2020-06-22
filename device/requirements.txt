@@ -2,4 +2,4 @@ paho-mqtt
 pyjwt
 cryptography
 path~=14.0.1
-
+loguru~=0.4.1
