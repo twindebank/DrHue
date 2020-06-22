@@ -12,10 +12,10 @@ todo make a base class from this to use for other data sources
 
 @dataclass
 class ParsedBridgeData:
+    name = 'hue'
+
     light_groups: Dict[str, LightGroup] = field(default_factory=list)
     sensors: Sensors = field(default_factory=list)
-
-    name: str = 'hue'
 
     @classmethod
     def from_raw(cls, bridge_data: dict):
