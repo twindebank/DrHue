@@ -23,10 +23,44 @@ make attach
 
 ---
 
+
+
+
+
 ### ToDo
 
+refactor with cloud IoT
 
 
+
+
+---
+1. Refactor to decouple some areas of code and how state is shared:
+- Adapter/bridge code: should be responsible only for interfacing with bridge:
+    * fetching data given a device identifier
+    * device identifiers should be formalised in this code (type.name)
+    * state that needs to be stored:
+        * (in memory) connection
+        * (in db) staged changes
+        * (in memory) cache of data from bridge, only read once per loop (eventually use to not resend commands to bridge)
+        * (in db) states of all registered devices
+    * exposed methods:
+        * read(uid, property)
+        * commit(uid, property, value)
+        * push()
+        * pull()
+- Entity code:
+    * friendly abstractions for interacting with devices/groups of devices
+    * provides framework to write rules
+    * stores state:
+        - (in db) active timeout
+        - does not store device state, always get that from bridge/adapter
+
+- Runner code:
+    * syncing between 
+    
+- Server code:
+    
 
 
 1. Improve rules and make more tolerant to external changes.

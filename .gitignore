@@ -139,3 +139,7 @@ cython_debug/
 .idea
 .python-version
 state.json
+
+creds/*
+*.pem
+*.pub
