@@ -1,8 +1,8 @@
 from loguru import logger
 
-from device.bridge import DrHueBridge
-from device.client import Client
-from device.parser import Parser
+from bridge import DrHueBridge
+from client import Client
+from parser import Parser
 
 """
 todo:

@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from device.contracts.bridge import ParsedBridgeData
+from contracts.bridge import ParsedBridgeData
 
 
 def clearable_cached_property(f):
