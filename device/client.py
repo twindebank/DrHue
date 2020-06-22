@@ -103,7 +103,7 @@ class Client:
     ca_certs: str = 'creds/roots.pem'  # CA root from https://pki.google.com/roots.pem
     mqtt_bridge_hostname: str = 'mqtt.googleapis.com'
     mqtt_bridge_port: int = 8883
-    jwt_exp_mins: datetime.timedelta = datetime.timedelta(minutes=60)
+    jwt_exp_mins: datetime.timedelta = datetime.timedelta(minutes=29)
 
     on_connect_callback: Callable = on_connect
     on_publish_callback: Callable = on_publish
