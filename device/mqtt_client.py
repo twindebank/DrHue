@@ -68,24 +68,25 @@ def error_str(rc):
 
 def on_connect(unused_client, unused_userdata, unused_flags, rc):
     """Callback for when a device connects."""
-    print('on_connect', mqtt.connack_string(rc))
+    logger.debug('on_connect', mqtt.connack_string(rc))
 
 
 def on_disconnect(unused_client, unused_userdata, rc):
     """Paho callback for when a device disconnects."""
-    print('on_disconnect', error_str(rc))
+    logger.debug('on_disconnect', error_str(rc))
 
 
 def on_publish(unused_client, unused_userdata, unused_mid):
     """Paho callback when a message is sent to the broker."""
-    print('on_publish')
+    logger.debug('on_publish')
 
 
 def on_message(unused_client, unused_userdata, message):
     """Callback when the device receives a message on a subscription."""
     payload = str(message.payload.decode('utf-8'))
-    print('Received message \'{}\' on topic \'{}\' with Qos {}'.format(
-        payload, message.topic, str(message.qos)))
+    logger.debug('Received message \'{}\' on topic \'{}\' with Qos {}'.format(
+        payload, message.topic, str(message.qos))
+    )
 
 
 def on_subscribe(client, userdata, mid, granted_qos):

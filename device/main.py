@@ -18,19 +18,21 @@ def main():
         data_holding_class=ParsedBridgeData
     )
 
-    def message_callback(*_, message):
-        """todo"""
-        return
-        api_calls = bridge_parser.parse_config_message(message)
-        for url, payload in api_calls.items():
-            bridge.call(url, payload)
+    def message_callback(*args, message):
+        logger.debug(f"MESSAGE RECIEVED: {message}")
+        logger.debug(f"ARGS: {message}")
+        # api_calls = bridge_parser.parse_config_message(message)
+        #
+        # for url, payload in api_calls.items():
+        #     bridge.call(url, payload)
 
     client = Client(
         device_id='rpi',
         registry_id='home',
         project_id='theo-home',
-        on_message_callback=message_callback
     )
+
+    client.on_message_callback(client.config_topic, message_callback)
 
     prev_telemetry_data = None
     prev_state_data = None
