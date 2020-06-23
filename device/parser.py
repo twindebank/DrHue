@@ -50,5 +50,5 @@ class Parser:
         type(self).state.fget.cache_clear()
         type(self).telemetry.fget.cache_clear()
 
-    def parse_config_message(self, message):
-        pass
+    def parse_config(self, config):
+        self.parsed_data.get_api_calls_from_config(config)

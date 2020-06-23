@@ -8,15 +8,15 @@ from contracts.fields import state_field
 class Light:
     name: str
     id: str
-    on: bool
-    brightness: int = state_field()
-    hue: Optional[int] = state_field()
-    saturation: Optional[int] = state_field()
-    effect: Optional[str] = state_field()
-    xy: Optional[List[int]] = state_field()
-    colour_temp: Optional[int] = state_field()
-    colour_mode: Optional[str] = state_field()
-    reachable: Optional[bool] = state_field()
+    on: bool = state_field(api_path='lights/{id}/state', payload_key='on')
+    brightness: int = state_field(api_path='lights/{id}/state', payload_key='bri')
+    hue: Optional[int] = state_field(api_path='lights/{id}/state', payload_key='hue')
+    saturation: Optional[int] = state_field(api_path='lights/{id}/state', payload_key='sat')
+    effect: Optional[str] = state_field(api_path='lights/{id}/state', payload_key='effect')
+    xy: Optional[List[int]] = state_field(api_path='lights/{id}/state', payload_key='xy')
+    colour_temp: Optional[int] = state_field(api_path='lights/{id}/state', payload_key='ct')
+    colour_mode: Optional[str] = state_field(api_path='lights/{id}/state', payload_key='colormode')
+    reachable: Optional[bool] = state_field(api_path=None, payload_key=None)
 
     @classmethod
     def from_raw(cls, light_name: str, light_id: str, light_state_data: dict):
@@ -35,6 +35,11 @@ class Light:
         )
 
     def __eq__(self, other):
+        """
+        Don't take missing attributes into account when comparing individual lights.
+
+        Todo: should factor this into dedicated function, approx_equal
+        """
         matches = []
         for prop in self.__dict__:
             this_attr = getattr(self, prop)
@@ -56,9 +61,10 @@ class LightGroup:
     name: str
     id: str
     lights: Dict[str, Light]
-    all_on: bool = state_field()
-    any_on: bool = state_field()
-    scene: Optional[str] = state_field()
+    all_on: bool = state_field(api_path="groups/{id}/state", payload_key="all_on")
+    any_on: bool = state_field(api_path="groups/{id}/state", payload_key="any_on")
+    # todo: do this later, is complicated, need to pass in a func here to convert to api calls to lights
+    scene: Optional[str] = state_field(api_path=None, payload_key=None)
 
     @classmethod
     def from_raw(cls, group_name: str, group_id: str, bridge_data: dict):

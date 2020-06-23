@@ -6,10 +6,6 @@ from loguru import logger
 from contracts.fields import state_field, telemetry_field
 
 
-class SensorNotFound(Exception):
-    pass
-
-
 @dataclass
 class Sensor:
     name: str
@@ -22,23 +18,31 @@ class Sensor:
     temp_sensor_uuid: str
 
     # general
-    battery: int = state_field()
-    reachable: bool = state_field()
-    led_indication: bool = state_field()
+    battery: int = telemetry_field()
+    reachable: bool = telemetry_field()
+    led_indication: bool = state_field(api_path="sensors/{motion_sensor_id}/config", payload_key="ledindication")
 
     # light sensor
-    light_sensor_last_updated: str = state_field()
+    light_sensor_last_updated: str = telemetry_field()
     light_sensor_level: int = telemetry_field()
     light_sensor_dark: bool = telemetry_field()
     light_sensor_daylight: bool = telemetry_field()
-    light_sensor_threshold_dark: int = state_field()
-    light_sensor_threshold_offset: int = state_field()
+    light_sensor_threshold_dark: int = state_field(
+        api_path="sensors/{light_sensor_id}/config", payload_key="tholddark"
+    )
+    light_sensor_threshold_offset: int = state_field(
+        api_path="sensors/{light_sensor_id}/config", payload_key="tholdoffset"
+    )
 
     # motion sensor
     motion_sensor_last_updated: str = telemetry_field()
     motion_sensor_presence: bool = telemetry_field()
-    motion_sensor_sensitivity: int = state_field()
-    motion_sensor_sensitivity_max: int = state_field()
+    motion_sensor_sensitivity: int = state_field(
+        api_path="sensors/{motion_sensor_id}/config", payload_key="sensitivity"
+    )
+    motion_sensor_sensitivity_max: int = state_field(
+        api_path="sensors/{motion_sensor_id}/config", payload_key="sensitivitymax"
+    )
 
     # temp sensor
     temp_sensor_last_updated: str = telemetry_field()

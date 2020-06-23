@@ -35,5 +35,6 @@ class ParsedBridgeData:
     def get_telemetry(self):
         return asdict(self, field_type=TELEMETRY, include_non_typed=True)
 
-    def get_api_calls_from_config_message(self, message):
-        pass
+    def get_api_calls_from_config(self, config):
+        for light_group, light_group_data in config.get('light_groups', {}).items():
+            pass

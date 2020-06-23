@@ -6,9 +6,11 @@ TELEMETRY = 'telemetry'
 from dataclasses import field, _is_dataclass_instance, fields
 
 
-def state_field(*args, **kwargs):
+def state_field(api_path, payload_key, *args, **kwargs):
     metadata = kwargs.get('metadata', {})
     metadata['type'] = STATE
+    metadata['api_path'] = api_path
+    metadata['payload_key'] = payload_key
     return field(*args, metadata=metadata, **kwargs)
 
 

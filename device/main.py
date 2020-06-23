@@ -1,3 +1,5 @@
+import json
+
 from loguru import logger
 
 from bridge import DrHueBridge
@@ -18,11 +20,11 @@ def main():
         data_holding_class=ParsedBridgeData
     )
 
-    def message_callback(*args, message):
+    def config_message_callback(client, user_data, message):
         logger.debug(f"MESSAGE RECIEVED: {message}")
-        logger.debug(f"ARGS: {message}")
-        # api_calls = bridge_parser.parse_config_message(message)
-        #
+
+        config = json.loads(message.payload)
+        hue_api_calls = bridge_parser.parse_config(config['hue'])
         # for url, payload in api_calls.items():
         #     bridge.call(url, payload)
 
@@ -32,7 +34,7 @@ def main():
         project_id='theo-home',
     )
 
-    client.on_message_callback(client.config_topic, message_callback)
+    client.add_message_callback(client.config_topic, config_message_callback)
 
     prev_telemetry_data = None
     prev_state_data = None
