@@ -84,7 +84,7 @@ class DrHueLights(DrHueAdapter):
         scenes_for_room = {scene_id: scene for scene_id, scene in self.bridge.raw_data['scenes'].items() if
                            tuple(sorted(scene['lights'])) == self.light_ids}
         for scene_id, scene in scenes_for_room.items():
-            scene_with_light_states = self.bridge.get_scene_data(scene_id)
+            scene_with_light_states = self.bridge._get_scene_data(scene_id)
             light_states_for_scene = scene_with_light_states['lightstates']  # on bri xy
             light_states = self.light_states
             match = False

@@ -3,7 +3,7 @@ from typing import Dict
 
 from loguru import logger
 
-from contracts.fields import state_field, telemetry_field
+from devices.base.fields import state_field, telemetry_field
 
 
 @dataclass

@@ -8,8 +8,8 @@ def clearable_cached_property(f):
 class Parser:
     _raw_data = None
 
-    def __init__(self, data_holding_class):
-        self.data_holding_class = data_holding_class
+    def __init__(self, data_handler_class):
+        self.data_handler_class = data_handler_class
 
     @property
     def raw_data(self):
@@ -24,7 +24,7 @@ class Parser:
 
     @clearable_cached_property
     def parsed_data(self):
-        return self.data_holding_class.from_raw(self.raw_data)
+        return self.data_handler_class.from_raw(self.raw_data)
 
     @clearable_cached_property
     def state(self):

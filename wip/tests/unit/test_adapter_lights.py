@@ -59,8 +59,8 @@ def test_get_lights_scene():
             'lightstates': {'1': {'state1': 'val1'}, '2': {'state2': 'val2'}}
         }
     }
-    bridge.get_scene_data = MagicMock()
-    bridge.get_scene_data.side_effect = lambda scene_id: light_states[scene_id]
+    bridge._get_scene_data = MagicMock()
+    bridge._get_scene_data.side_effect = lambda scene_id: light_states[scene_id]
     lights = DrHueLights(bridge, 'TestGroupName')
     assert lights.scene == 'scene1'
 
@@ -87,7 +87,7 @@ def test_get_lights_scene_no_matching_scene():
             'lightstates': {'1': {'state1': 'val1'}, '2': {'state2': 'val2'}}
         }
     }
-    bridge.get_scene_data = MagicMock()
-    bridge.get_scene_data.side_effect = lambda scene_id: light_states[scene_id]
+    bridge._get_scene_data = MagicMock()
+    bridge._get_scene_data.side_effect = lambda scene_id: light_states[scene_id]
     lights = DrHueLights(bridge, 'TestGroupName')
     assert lights.scene is None

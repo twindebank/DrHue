@@ -1,13 +1,12 @@
-import datetime
 import os
 
 import requests
 from loguru import logger
 
+from devices.base.connector import BaseConnector
 
-class DrHueBridge:
-    """
-    """
+
+class HueConnector(BaseConnector):
 
     def __init__(self):
         self.ip = self._get_bridge_ip()
@@ -29,12 +28,11 @@ class DrHueBridge:
         Have to call scenes endpoint to get enough data to match scene with scene name.
         """
         raw_data = self.get()
-        scene_data = {scene_id: self.get_scene_data(scene_id) for scene_id in raw_data['scenes']}
+        scene_data = {scene_id: self._get_scene_data(scene_id) for scene_id in raw_data['scenes']}
         raw_data['scenes'] = scene_data
-        raw_data['collected_datetime'] = datetime.datetime.now().isoformat()
         return raw_data
 
-    def get_scene_data(self, scene_id):
+    def _get_scene_data(self, scene_id):
         return self.get(f'scenes/{scene_id}')
 
     def _put(self, relative_path, payload):
@@ -43,20 +41,7 @@ class DrHueBridge:
         r.raise_for_status()
         return r.json()
 
-    def multi_put(self, calls):
-        """
-
-
-        todo: here
-
-
-        calls back to bridge failing need to look into it
-
-
-        :param calls:
-        :return:
-        """
-
+    def execute_calls(self, calls):
         for api_path, payload in calls.items():
             status_msgs = self._put(api_path, payload)
             for msg in status_msgs:

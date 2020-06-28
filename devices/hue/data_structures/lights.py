@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 
-from contracts.fields import state_field
+from devices.base.fields import state_field
 
 
 @dataclass

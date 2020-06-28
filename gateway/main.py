@@ -17,7 +17,7 @@ def main():
 
     bridge = DrHueBridge()
     bridge_parser = Parser(
-        data_holding_class=ParsedBridgeData
+        data_handler_class=ParsedBridgeData
     )
 
     def config_message_callback(client, user_data, message):
@@ -44,11 +44,11 @@ def main():
         client.loop()
         if bridge_parser.has_telemetry_changed(prev_telemetry_data):
             logger.info('Telemetry changed!')
-            client.send_telemetry_event(bridge_parser.data_holding_class.name, bridge_parser.telemetry)
+            client.send_telemetry_event(bridge_parser.data_handler_class.name, bridge_parser.telemetry)
             prev_telemetry_data = bridge_parser.telemetry
         if bridge_parser.has_state_changed(prev_state_data):
             logger.info('State changed!')
-            client.send_state(bridge_parser.data_holding_class.name, bridge_parser.state)
+            client.send_state(bridge_parser.data_handler_class.name, bridge_parser.state)
             prev_state_data = bridge_parser.state
         client.loop()
 
