@@ -8,7 +8,7 @@ from drhue.bridge import DrHueBridge
 
 def test_lights_get_group_key():
     bridge = Mock(spec=DrHueBridge)
-    bridge.data = {
+    bridge.raw_data = {
         'lights': {
             '1': 'one',
             '2': 'two',
@@ -24,7 +24,7 @@ def test_lights_get_group_key():
 
 def test_lights_group_not_found():
     bridge = Mock(spec=DrHueBridge)
-    bridge.data = {
+    bridge.raw_data = {
         'lights': {
             '1': 'one',
             '2': 'two',
@@ -39,7 +39,7 @@ def test_lights_group_not_found():
 
 def test_get_lights_scene():
     bridge = Mock(spec=DrHueBridge)
-    bridge.data = {
+    bridge.raw_data = {
         'lights': {
             '1': {'state': {'state1': 'val1'}},
             '2': {'state': {'state2': 'val2'}},
@@ -67,7 +67,7 @@ def test_get_lights_scene():
 
 def test_get_lights_scene_no_matching_scene():
     bridge = Mock(spec=DrHueBridge)
-    bridge.data = {
+    bridge.raw_data = {
         'lights': {
             '1': {'state': {'state1': 'val4'}},
             '2': {'state': {'state2': 'val5'}},

@@ -15,7 +15,7 @@ class Light:
     effect: Optional[str] = state_field(api_path='lights/{id}/state', payload_key='effect')
     xy: Optional[List[int]] = state_field(api_path='lights/{id}/state', payload_key='xy')
     colour_temp: Optional[int] = state_field(api_path='lights/{id}/state', payload_key='ct')
-    colour_mode: Optional[str] = state_field(api_path='lights/{id}/state', payload_key='colormode')
+    colour_mode: Optional[str] = state_field(api_path=None, payload_key=None)
     reachable: Optional[bool] = state_field(api_path=None, payload_key=None)
 
     @classmethod
@@ -61,9 +61,9 @@ class LightGroup:
     name: str
     id: str
     lights: Dict[str, Light]
-    all_on: bool = state_field(api_path="groups/{id}/state", payload_key="all_on")
-    any_on: bool = state_field(api_path="groups/{id}/state", payload_key="any_on")
-    # todo: do this later, is complicated, need to pass in a func here to convert to api calls to lights
+    all_on: bool = state_field(api_path="groups/{id}/action", payload_key="on")
+    any_on: bool = state_field(api_path=None, payload_key=None)
+    # todo: do scenes later, is complicated, need to pass in a func here to convert to api calls to lights
     scene: Optional[str] = state_field(api_path=None, payload_key=None)
 
     @classmethod

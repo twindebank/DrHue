@@ -4,3 +4,4 @@ cryptography~=2.9.2
 path~=14.0.1
 loguru~=0.4.1
 requests~=2.23.0
+python-benedict~=0.18.1

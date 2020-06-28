@@ -11,17 +11,17 @@ class DrHueSensor(DrHueAdapter):
 
     def _get_sensor_keys(self):
         motion_sensor_key = None
-        for key, sensor in self.bridge.data["sensors"].items():
+        for key, sensor in self.bridge.raw_data["sensors"].items():
             if self.name == sensor["name"]:
                 motion_sensor_key = key
                 break
         if motion_sensor_key is None:
             raise ModuleNotFoundError()
 
-        uuid = self.bridge.data["sensors"][motion_sensor_key]["uniqueid"]
+        uuid = self.bridge.raw_data["sensors"][motion_sensor_key]["uniqueid"]
         partial_uuid = uuid.split('-')[0]
         temp_sensor_key, light_sensor_key = None, None
-        for key, sensor in self.bridge.data["sensors"].items():
+        for key, sensor in self.bridge.raw_data["sensors"].items():
             if sensor.get('uniqueid', '').startswith(partial_uuid):
                 if sensor['type'] == 'ZLLTemperature':
                     temp_sensor_key = key
@@ -39,20 +39,20 @@ class DrHueSensor(DrHueAdapter):
 
     @property
     def motion(self):
-        return self.store_state(self.bridge.data['sensors'][self.motion_sensor_key]['state']['presence'])
+        return self.store_state(self.bridge.raw_data['sensors'][self.motion_sensor_key]['state']['presence'])
 
     @property
     def temperature(self):
-        return self.store_state(self.bridge.data['sensors'][self.temp_sensor_key]['state']['temperature'] / 100)
+        return self.store_state(self.bridge.raw_data['sensors'][self.temp_sensor_key]['state']['temperature'] / 100)
 
     @property
     def daylight(self):
-        return self.store_state(self.bridge.data['sensors'][self.light_sensor_key]['state']['daylight'])
+        return self.store_state(self.bridge.raw_data['sensors'][self.light_sensor_key]['state']['daylight'])
 
     @property
     def lightlevel(self):
-        return self.store_state(self.bridge.data['sensors'][self.light_sensor_key]['state']['lightlevel'])
+        return self.store_state(self.bridge.raw_data['sensors'][self.light_sensor_key]['state']['lightlevel'])
 
     @property
     def dark(self):
-        return self.store_state(self.bridge.data['sensors'][self.light_sensor_key]['state']['dark'])
+        return self.store_state(self.bridge.raw_data['sensors'][self.light_sensor_key]['state']['dark'])

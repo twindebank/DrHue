@@ -8,7 +8,7 @@ from drhue.bridge import DrHueBridge
 
 def test_sensor_get_sensor_keys():
     bridge = Mock(spec=DrHueBridge)
-    bridge.data = {
+    bridge.raw_data = {
         'sensors': {
             '1': {
                 'name': 'Sensor 1',
@@ -37,7 +37,7 @@ def test_sensor_get_sensor_keys():
 
 def test_sensor_not_found():
     bridge = Mock(spec=DrHueBridge)
-    bridge.data = {
+    bridge.raw_data = {
         'sensors': {
             '1': {
                 'name': 'Sensor 1',

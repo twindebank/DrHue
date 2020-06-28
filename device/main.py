@@ -24,9 +24,10 @@ def main():
         logger.debug(f"MESSAGE RECIEVED: {message}")
 
         config = json.loads(message.payload)
-        hue_api_calls = bridge_parser.parse_config(config['hue'])
-        # for url, payload in api_calls.items():
-        #     bridge.call(url, payload)
+        hue_config = config.get('hue', {}).get('state', None)
+        if hue_config is not None:
+            hue_api_calls = bridge_parser.parse_config(hue_config)
+            bridge.multi_put(hue_api_calls)
 
     client = Client(
         device_id='rpi',
@@ -39,16 +40,16 @@ def main():
     prev_telemetry_data = None
     prev_state_data = None
     while True:
-        bridge_parser.data = bridge.get_raw_data()
+        bridge_parser.raw_data = bridge.get_raw_data()
         client.loop()
-        if prev_telemetry_data != bridge_parser.telemetry['data']:
+        if bridge_parser.has_telemetry_changed(prev_telemetry_data):
             logger.info('Telemetry changed!')
-            client.send_telemetry_event(bridge_parser.telemetry)
-            prev_telemetry_data = bridge_parser.telemetry['data']
-        if prev_state_data != bridge_parser.state['data']:
+            client.send_telemetry_event(bridge_parser.data_holding_class.name, bridge_parser.telemetry)
+            prev_telemetry_data = bridge_parser.telemetry
+        if bridge_parser.has_state_changed(prev_state_data):
             logger.info('State changed!')
-            client.send_state(bridge_parser.state)
-            prev_state_data = bridge_parser.state['data']
+            client.send_state(bridge_parser.data_holding_class.name, bridge_parser.state)
+            prev_state_data = bridge_parser.state
         client.loop()
 
 

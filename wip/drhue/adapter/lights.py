@@ -26,7 +26,7 @@ class DrHueLights(DrHueAdapter):
         This function finds the integer that identifies the group, based on the name.
         """
         group_key = None
-        for key, group in self.bridge.data["groups"].items():
+        for key, group in self.bridge.raw_data["groups"].items():
             if self.name == group["name"]:
                 group_key = key
                 break
@@ -36,18 +36,18 @@ class DrHueLights(DrHueAdapter):
 
     @property
     def light_ids(self):
-        return tuple(sorted(self.bridge.data['groups'][self.group_key]['lights']))
+        return tuple(sorted(self.bridge.raw_data['groups'][self.group_key]['lights']))
 
     @property
     def light_states(self):
         light_states = {}
         for light_id in self.light_ids:
-            light_states[light_id] = self.bridge.data['lights'][light_id]['state']
+            light_states[light_id] = self.bridge.raw_data['lights'][light_id]['state']
         return light_states
 
     @property
     def on(self):
-        return self.store_state(self.bridge.data['groups'][self.group_key]['action']['on'])
+        return self.store_state(self.bridge.raw_data['groups'][self.group_key]['action']['on'])
 
     @on.setter
     def on(self, state):
@@ -56,7 +56,7 @@ class DrHueLights(DrHueAdapter):
 
     @property
     def brightness(self):
-        return self.store_state(self.bridge.data['groups'][self.group_key]['action']['bri'])
+        return self.store_state(self.bridge.raw_data['groups'][self.group_key]['action']['bri'])
 
     @brightness.setter
     def brightness(self, brightness):
@@ -67,7 +67,7 @@ class DrHueLights(DrHueAdapter):
     @property
     def _scene_lookup(self):
         return {scene_info['name'] + str(tuple(sorted(scene_info['lights']))): scene_id for scene_id, scene_info in
-                self.bridge.data['scenes'].items()}
+                self.bridge.raw_data['scenes'].items()}
 
     def _get_scene_id(self, scene_name):
         try:
@@ -81,7 +81,7 @@ class DrHueLights(DrHueAdapter):
         Hue APi doesn't seem to expose a method to get an active scene given a light group.
         This tries to deduce the active scene by matching light states for scenes with light active light states.
         """
-        scenes_for_room = {scene_id: scene for scene_id, scene in self.bridge.data['scenes'].items() if
+        scenes_for_room = {scene_id: scene for scene_id, scene in self.bridge.raw_data['scenes'].items() if
                            tuple(sorted(scene['lights'])) == self.light_ids}
         for scene_id, scene in scenes_for_room.items():
             scene_with_light_states = self.bridge.get_scene_data(scene_id)

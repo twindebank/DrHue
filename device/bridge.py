@@ -1,3 +1,4 @@
+import datetime
 import os
 
 import requests
@@ -30,6 +31,7 @@ class DrHueBridge:
         raw_data = self.get()
         scene_data = {scene_id: self.get_scene_data(scene_id) for scene_id in raw_data['scenes']}
         raw_data['scenes'] = scene_data
+        raw_data['collected_datetime'] = datetime.datetime.now().isoformat()
         return raw_data
 
     def get_scene_data(self, scene_id):
@@ -40,6 +42,26 @@ class DrHueBridge:
         r = requests.put(f"{self.api_path}/{relative_path}", json=payload)
         r.raise_for_status()
         return r.json()
+
+    def multi_put(self, calls):
+        """
+
+
+        todo: here
+
+
+        calls back to bridge failing need to look into it
+
+
+        :param calls:
+        :return:
+        """
+
+        for api_path, payload in calls.items():
+            status_msgs = self._put(api_path, payload)
+            for msg in status_msgs:
+                if 'error' in msg:
+                    logger.error(msg['error'])
 
     def get(self, relative_path='') -> dict:
         path_str = f' ({relative_path})' if relative_path else ''
